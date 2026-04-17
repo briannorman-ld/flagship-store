@@ -12,6 +12,11 @@ const categories = Object.entries(categoryMeta).map(([slug, meta]) => ({
   description: meta.description,
 }))
 
+/** Shorter header nav text (full labels stay in PLPs, footer, etc.) */
+function navItemLabel(label: string) {
+  return label.replace(/\s+Flags$/i, '').trim()
+}
+
 export default function Layout({ children }: { children: React.ReactNode }) {
   const { itemCount } = useCart()
   const { isLoggedIn, user, logout } = useAuth()
@@ -49,14 +54,14 @@ export default function Layout({ children }: { children: React.ReactNode }) {
             </Link>
 
             {/* Desktop nav */}
-            <nav className="hidden lg:flex items-center gap-6 text-sm font-medium">
+            <nav className="hidden lg:flex items-center gap-4 text-sm font-medium">
               {categories.map(cat => (
                 <Link
                   key={cat.slug}
                   to={`/flags/${cat.slug}`}
                   className="text-gray-300 hover:text-white transition-colors whitespace-nowrap"
                 >
-                  {cat.label}
+                  {navItemLabel(cat.label)}
                 </Link>
               ))}
             </nav>
@@ -131,7 +136,7 @@ export default function Layout({ children }: { children: React.ReactNode }) {
                   onClick={() => setMenuOpen(false)}
                   className="block py-2 text-sm text-gray-300 hover:text-white"
                 >
-                  {cat.label}
+                  {navItemLabel(cat.label)}
                 </Link>
               ))}
               <form onSubmit={handleSearch} className="flex items-center mt-3 bg-white/10 rounded-lg px-3 py-2">

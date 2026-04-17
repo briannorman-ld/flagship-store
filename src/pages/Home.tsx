@@ -13,6 +13,9 @@ const categoryCards = [
 const featuredProducts = products.filter(p => p.featured).slice(0, 4)
 const newArrivals = products.slice(-4)
 
+/** Self-hosted in /public; works with Vite `base` on GitHub Pages */
+const heroImageSrc = `${import.meta.env.BASE_URL}hero-american-flag-mountains.jpg`
+
 export default function Home() {
   const flags = useLDFlags()
   const heroVariant = flags['homepage-hero-variant']
@@ -40,29 +43,47 @@ export default function Home() {
           </div>
         </section>
       ) : (
-        /* control / default hero */
-        <section className="relative bg-[#1B2A4A] text-white overflow-hidden">
-          <div className="absolute inset-0 opacity-10">
-            <div className="w-full h-full" style={{
-              backgroundImage: 'repeating-linear-gradient(0deg, #B22234 0px, #B22234 38px, white 38px, white 54px, #B22234 54px)',
-            }} />
-          </div>
-          <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-24 flex flex-col items-center text-center">
-            <h1 className="text-5xl md:text-6xl font-extrabold tracking-tight mb-4">
+        /* control / default hero — American flag, Black Canyon of the Gunnison (CO) */
+        <section className="relative text-white overflow-hidden min-h-[min(85vh,640px)] flex flex-col">
+          <img
+            src={heroImageSrc}
+            alt=""
+            className="absolute inset-0 h-full w-full object-cover object-[center_35%]"
+            decoding="async"
+            fetchPriority="high"
+          />
+          <div
+            className="absolute inset-0 bg-gradient-to-t from-[#0f1729] via-[#1B2A4A]/85 to-[#1B2A4A]/55"
+            aria-hidden
+          />
+          <div className="relative flex-1 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-20 md:py-28 flex flex-col items-center justify-center text-center">
+            <h1 className="text-5xl md:text-6xl font-extrabold tracking-tight mb-4 drop-shadow-sm">
               Raise Your Colors.
             </h1>
-            <p className="text-xl text-gray-300 mb-8 max-w-xl">
+            <p className="text-xl text-gray-200 mb-8 max-w-xl drop-shadow-sm">
               The finest flags for patriots, sailors, golfers, and collectors. Ships fast, built to last.
             </p>
             <div className="flex gap-4 flex-wrap justify-center">
-              <Link to="/flags/american" className="bg-[#B22234] text-white font-semibold px-8 py-3 rounded-lg hover:bg-red-700 transition-colors">
+              <Link to="/flags/american" className="bg-[#B22234] text-white font-semibold px-8 py-3 rounded-lg hover:bg-red-700 transition-colors shadow-lg">
                 Shop American Flags
               </Link>
-              <Link to="/flags/nautical" className="bg-white/20 text-white font-semibold px-8 py-3 rounded-lg hover:bg-white/30 transition-colors">
+              <Link to="/flags/nautical" className="bg-white/15 backdrop-blur-sm text-white font-semibold px-8 py-3 rounded-lg hover:bg-white/25 transition-colors border border-white/20">
                 Browse All Categories
               </Link>
             </div>
           </div>
+          <p className="relative z-10 text-center text-[10px] sm:text-xs text-white/50 pb-3 px-4">
+            Photo:{' '}
+            <a
+              href="https://unsplash.com/photos/LgYYGtA23RY"
+              className="underline hover:text-white/70"
+              target="_blank"
+              rel="noreferrer noopener"
+            >
+              Laura Seaman
+            </a>
+            {' '}/ Unsplash
+          </p>
         </section>
       )}
 
