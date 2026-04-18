@@ -9,7 +9,8 @@
     "lint": "eslint .",
     "preview": "vite preview",
     "predeploy": "npm run build",
-    "deploy": "gh-pages -d dist"
+    "deploy": "gh-pages -d dist",
+    "metrics:create": "node scripts/create-flagship-store-metrics.mjs"
   },
   "dependencies": {
     "flag-icons": "^7.5.0",

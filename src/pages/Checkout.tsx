@@ -1,10 +1,12 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useCart } from '../context/CartContext'
 import { useAuth } from '../context/AuthContext'
 import { useLDFlags } from '../hooks/useLDFlags'
 import type { Order, Address } from '../types'
 import { showToast } from '../components/Toast'
+import { useStoreMetricTrack } from '../hooks/useStoreMetricTrack'
+import { STORE_METRIC_EVENTS } from '../analytics/storeMetricEvents'
 
 type Step = 1 | 2 | 3
 
@@ -55,6 +57,7 @@ export default function Checkout() {
   const { items, subtotal, clearCart } = useCart()
   const { user } = useAuth()
   const flags = useLDFlags()
+  const trackMetric = useStoreMetricTrack()
   const navigate = useNavigate()
 
   const [step, setStep] = useState<Step>(1)
@@ -86,6 +89,14 @@ export default function Checkout() {
   const discountedSub = subtotal - discount
   const tax = (discountedSub + shippingCost) * 0.08
   const total = discountedSub + shippingCost + tax
+
+  useEffect(() => {
+    if (items.length === 0) return
+    trackMetric(STORE_METRIC_EVENTS.checkoutStart, {
+      itemCount: items.length,
+      subtotal,
+    })
+  }, [items.length, subtotal, trackMetric])
 
   const visibleMethods = flags['enable-express-checkout']
     ? shippingMethods

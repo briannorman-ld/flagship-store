@@ -1,7 +1,9 @@
-import { useState, useMemo } from 'react'
+import { useState, useMemo, useEffect } from 'react'
 import { useParams, Link } from 'react-router-dom'
 import { products, categoryMeta } from '../data/products'
 import ProductCard from '../components/ProductCard'
+import { useStoreMetricTrack } from '../hooks/useStoreMetricTrack'
+import { STORE_METRIC_EVENTS } from '../analytics/storeMetricEvents'
 
 const ITEMS_PER_PAGE = 12
 
@@ -9,11 +11,18 @@ type SortOption = 'featured' | 'price-asc' | 'price-desc' | 'rating'
 
 export default function CategoryPLP() {
   const { slug } = useParams<{ slug: string }>()
+  const trackMetric = useStoreMetricTrack()
   const [sort, setSort] = useState<SortOption>('featured')
   const [page, setPage] = useState(1)
   const [maxPrice, setMaxPrice] = useState(300)
 
   const meta = slug ? categoryMeta[slug] : null
+
+  useEffect(() => {
+    if (!meta || !slug) return
+    trackMetric(STORE_METRIC_EVENTS.plpView, { category: slug })
+  }, [meta, slug, trackMetric])
+
   const categoryProducts = useMemo(() => {
     let list = slug ? products.filter(p => p.category === slug) : products
     list = list.filter(p => p.price <= maxPrice)

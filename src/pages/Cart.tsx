@@ -1,12 +1,15 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import { useCart } from '../context/CartContext'
 import FlagImage from '../components/FlagImage'
 import { useLDFlags } from '../hooks/useLDFlags'
+import { useStoreMetricTrack } from '../hooks/useStoreMetricTrack'
+import { STORE_METRIC_EVENTS } from '../analytics/storeMetricEvents'
 
 export default function Cart() {
   const { items, removeFromCart, updateQuantity, subtotal } = useCart()
   const flags = useLDFlags()
+  const trackMetric = useStoreMetricTrack()
   const navigate = useNavigate()
   const [promoCode, setPromoCode] = useState('')
   const [promoApplied, setPromoApplied] = useState(false)
@@ -18,6 +21,13 @@ export default function Cart() {
   const discountedSubtotal = subtotal - discount
   const tax = (discountedSubtotal + shipping) * 0.08
   const total = discountedSubtotal + shipping + tax
+
+  useEffect(() => {
+    trackMetric(STORE_METRIC_EVENTS.cartView, {
+      itemCount: items.length,
+      empty: items.length === 0,
+    })
+  }, [items.length, trackMetric])
 
   function applyPromo() {
     if (promoCode.toUpperCase() === 'FLAGSHIP20') {

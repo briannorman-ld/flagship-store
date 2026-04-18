@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { useParams, Link } from 'react-router-dom'
 import { products } from '../data/products'
 import { getReviewsForProduct } from '../data/reviews'
@@ -10,17 +10,28 @@ import { useWishlist } from '../context/WishlistContext'
 import { useLDFlags } from '../hooks/useLDFlags'
 import { showToast } from '../components/Toast'
 import { categoryMeta } from '../data/products'
+import { useStoreMetricTrack } from '../hooks/useStoreMetricTrack'
+import { STORE_METRIC_EVENTS } from '../analytics/storeMetricEvents'
 
 export default function ProductDetail() {
   const { id } = useParams<{ id: string }>()
   const product = products.find(p => p.id === id)
   const flags = useLDFlags()
+  const trackMetric = useStoreMetricTrack()
   const { addToCart } = useCart()
   const { addToWishlist, removeFromWishlist, isWishlisted } = useWishlist()
   const [selectedSize, setSelectedSize] = useState('')
   const [selectedMaterial, setSelectedMaterial] = useState('')
   const [quantity, setQuantity] = useState(1)
   const [activeTab, setActiveTab] = useState<'description' | 'shipping' | 'reviews'>('description')
+
+  useEffect(() => {
+    if (!product) return
+    trackMetric(STORE_METRIC_EVENTS.pdpView, {
+      productId: product.id,
+      category: product.category,
+    })
+  }, [product, trackMetric])
 
   if (!product) {
     return (
@@ -41,6 +52,13 @@ export default function ProductDetail() {
     const size = selectedSize || p.sizes[0]
     const material = selectedMaterial || p.material[0]
     addToCart(p, quantity, size, material)
+    trackMetric(STORE_METRIC_EVENTS.addToCart, {
+      productId: p.id,
+      category: p.category,
+      quantity,
+      size,
+      material,
+    })
     showToast(`${p.name} added to cart`)
   }
 

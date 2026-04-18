@@ -1,9 +1,12 @@
 import { useEffect, useState } from 'react'
 import { useParams, Link } from 'react-router-dom'
 import type { Order } from '../types'
+import { useStoreMetricTrack } from '../hooks/useStoreMetricTrack'
+import { STORE_METRIC_EVENTS } from '../analytics/storeMetricEvents'
 
 export default function OrderConfirmation() {
   const { orderId } = useParams<{ orderId: string }>()
+  const trackMetric = useStoreMetricTrack()
   const [order, setOrder] = useState<Order | null>(null)
   const [show, setShow] = useState(false)
 
@@ -13,6 +16,14 @@ export default function OrderConfirmation() {
     setOrder(found ?? null)
     setTimeout(() => setShow(true), 100)
   }, [orderId])
+
+  useEffect(() => {
+    if (!order) return
+    trackMetric(STORE_METRIC_EVENTS.orderConfirmation, {
+      orderId: order.id,
+      total: order.total,
+    })
+  }, [order, trackMetric])
 
   if (!order) {
     return (
