@@ -1,5 +1,6 @@
 import { Link } from 'react-router-dom'
 import { products, categoryMeta } from '../data/products'
+import type { Product } from '../types'
 import ProductCard from '../components/ProductCard'
 import { useLDFlags } from '../hooks/useLDFlags'
 
@@ -10,7 +11,37 @@ const categoryCards = [
   { slug: 'golf', emoji: '⛳', bg: 'from-green-600 to-lime-400' },
 ]
 
-const featuredProducts = products.filter(p => p.featured).slice(0, 4)
+/** Same four categories as the hero category cards — one standout per category. */
+const BEST_SELLER_CATEGORY_SLUGS = ['american', 'nautical', 'state', 'golf'] as const
+
+function bestSellersShowcase(catalog: Product[]): Product[] {
+  const seenImages = new Set<string>()
+  const out: Product[] = []
+
+  for (const slug of BEST_SELLER_CATEGORY_SLUGS) {
+    const inCat = catalog.filter(p => p.category === slug)
+    if (inCat.length === 0) continue
+
+    const preferFeatured = inCat.filter(p => p.featured)
+    const pool = preferFeatured.length > 0 ? preferFeatured : inCat
+    let sorted = [...pool].sort((a, b) => b.reviewCount - a.reviewCount)
+
+    // Golf: numbered sets share one artwork — prefer the next-strongest item with a different graphic.
+    if (slug === 'golf') {
+      const allGolf = [...inCat].sort((a, b) => b.reviewCount - a.reviewCount)
+      const alt = allGolf.find(p => !p.flagImagePath.includes('golf-numbered'))
+      if (alt) sorted = [alt, ...sorted.filter(p => p.id !== alt.id)]
+    }
+
+    const choice = sorted.find(p => !seenImages.has(p.flagImagePath)) ?? sorted[0]
+    out.push(choice)
+    seenImages.add(choice.flagImagePath)
+  }
+
+  return out
+}
+
+const bestSellerProducts = bestSellersShowcase(products)
 const newArrivals = products.slice(-4)
 
 /** Self-hosted in /public; works with Vite `base` on GitHub Pages */
@@ -95,10 +126,10 @@ export default function Home() {
             <Link
               key={slug}
               to={`/flags/${slug}`}
-              className={`bg-gradient-to-br ${bg} text-white rounded-xl p-6 flex flex-col items-center justify-center gap-3 hover:scale-105 transition-transform shadow-md aspect-square`}
+              className={`bg-gradient-to-br ${bg} text-white rounded-xl py-2.5 px-3 flex flex-row items-center justify-center gap-2.5 hover:scale-[1.02] transition-transform shadow-md aspect-[3/1]`}
             >
-              <span className="text-4xl">{emoji}</span>
-              <span className="font-semibold text-center text-sm">{categoryMeta[slug].label}</span>
+              <span className="text-2xl shrink-0">{emoji}</span>
+              <span className="font-semibold text-center text-xs sm:text-sm leading-tight">{categoryMeta[slug].label}</span>
             </Link>
           ))}
         </div>
@@ -120,10 +151,10 @@ export default function Home() {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex items-center justify-between mb-6">
             <h2 className="text-2xl font-bold text-gray-900">Best Sellers</h2>
-            <Link to="/flags/american" className="text-sm text-[#B22234] font-medium hover:underline">View all →</Link>
+            <Link to="/" className="text-sm text-[#B22234] font-medium hover:underline">Shop all →</Link>
           </div>
           <div className="grid grid-cols-2 md:grid-cols-4 gap-5">
-            {featuredProducts.map(p => <ProductCard key={p.id} product={p} />)}
+            {bestSellerProducts.map(p => <ProductCard key={p.id} product={p} />)}
           </div>
         </div>
       </section>
