@@ -11,6 +11,7 @@ export interface FlagSet {
   'checkout-progress-indicator': boolean
   'free-shipping-threshold': number
   'homepage-hero-variant': string
+  'eh-desktop-hero-category-match-desktop': boolean
 }
 
 const defaults: FlagSet = {
@@ -24,6 +25,7 @@ const defaults: FlagSet = {
   'checkout-progress-indicator': true,
   'free-shipping-threshold': 75,
   'homepage-hero-variant': 'control',
+  'eh-desktop-hero-category-match-desktop': false,
 }
 
 export function useLDFlags(): FlagSet {
@@ -39,5 +41,6 @@ export function useLDFlags(): FlagSet {
     'checkout-progress-indicator': flags['checkout-progress-indicator'] ?? defaults['checkout-progress-indicator'],
     'free-shipping-threshold': flags['free-shipping-threshold'] ?? defaults['free-shipping-threshold'],
     'homepage-hero-variant': flags['homepage-hero-variant'] ?? defaults['homepage-hero-variant'],
+    'eh-desktop-hero-category-match-desktop': flags['eh-desktop-hero-category-match-desktop'] ?? defaults['eh-desktop-hero-category-match-desktop'],
   }
 }
