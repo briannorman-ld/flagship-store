@@ -1,0 +1,113 @@
+name: Experiment Hunter — PR verify
+
+on:
+  pull_request:
+    types: [opened, synchronize, reopened, ready_for_review]
+
+concurrency:
+  group: experiment-hunter-pr-verify-${{ github.event.pull_request.number }}
+  cancel-in-progress: true
+
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Detect Node project
+        id: stack
+        run: |
+          if [ -f package.json ]; then
+            echo "has_node=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "has_node=false" >> "$GITHUB_OUTPUT"
+            echo "No package.json — skipping Node verify."
+          fi
+
+      - uses: actions/setup-node@v4
+        if: steps.stack.outputs.has_node == 'true'
+        with:
+          node-version: '20'
+
+      - name: Enable Corepack
+        if: steps.stack.outputs.has_node == 'true'
+        run: corepack enable
+
+      - name: Install dependencies
+        if: steps.stack.outputs.has_node == 'true'
+        run: |
+          set -euo pipefail
+          if [ -f pnpm-lock.yaml ]; then
+            corepack prepare pnpm@9 --activate
+            pnpm install --frozen-lockfile
+            echo "PM=pnpm" >> "$GITHUB_ENV"
+          elif [ -f yarn.lock ]; then
+            corepack prepare yarn@stable --activate || true
+            yarn install --immutable || yarn install --frozen-lockfile || yarn install
+            echo "PM=yarn" >> "$GITHUB_ENV"
+          elif [ -f package-lock.json ]; then
+            npm ci
+            echo "PM=npm" >> "$GITHUB_ENV"
+          else
+            npm install
+            echo "PM=npm" >> "$GITHUB_ENV"
+          fi
+
+      - name: Lint (if script exists)
+        if: steps.stack.outputs.has_node == 'true'
+        run: |
+          set -euo pipefail
+          PM="${{ env.PM }}"
+          has_script() { jq -e ".scripts[\"$1\"]" package.json >/dev/null 2>&1; }
+          if has_script lint; then
+            if [ "$PM" = "pnpm" ]; then pnpm run lint
+            elif [ "$PM" = "yarn" ]; then yarn run lint
+            else npm run lint; fi
+          else echo "No lint script; skip."; fi
+
+      - name: Typecheck (if script exists)
+        if: steps.stack.outputs.has_node == 'true'
+        run: |
+          set -euo pipefail
+          PM="${{ env.PM }}"
+          has_script() { jq -e ".scripts[\"$1\"]" package.json >/dev/null 2>&1; }
+          if has_script typecheck; then
+            if [ "$PM" = "pnpm" ]; then pnpm run typecheck
+            elif [ "$PM" = "yarn" ]; then yarn run typecheck
+            else npm run typecheck; fi
+          elif has_script check-types; then
+            if [ "$PM" = "pnpm" ]; then pnpm run check-types
+            elif [ "$PM" = "yarn" ]; then yarn run check-types
+            else npm run check-types; fi
+          else echo "No typecheck script; skip."; fi
+
+      - name: Unit tests (if script exists)
+        if: steps.stack.outputs.has_node == 'true'
+        run: |
+          set -euo pipefail
+          PM="${{ env.PM }}"
+          has_script() { jq -e ".scripts[\"$1\"]" package.json >/dev/null 2>&1; }
+          if has_script test:run; then
+            if [ "$PM" = "pnpm" ]; then pnpm run test:run
+            elif [ "$PM" = "yarn" ]; then yarn run test:run
+            else npm run test:run; fi
+          elif has_script test; then
+            if [ "$PM" = "pnpm" ]; then pnpm test --run || pnpm test
+            elif [ "$PM" = "yarn" ]; then yarn test --run || yarn test
+            else npm test -- --run 2>/dev/null || npm test; fi
+          else echo "No test script; skip."; fi
+
+      - name: Production build (if script exists)
+        if: steps.stack.outputs.has_node == 'true'
+        run: |
+          set -euo pipefail
+          PM="${{ env.PM }}"
+          has_script() { jq -e ".scripts[\"$1\"]" package.json >/dev/null 2>&1; }
+          if has_script build; then
+            if [ "$PM" = "pnpm" ]; then pnpm run build
+            elif [ "$PM" = "yarn" ]; then yarn run build
+            else npm run build; fi
+          else echo "No build script; skip."; fi
