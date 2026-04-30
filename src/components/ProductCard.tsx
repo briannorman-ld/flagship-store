@@ -4,7 +4,7 @@ import FlagImage from './FlagImage'
 import StarRating from './StarRating'
 import { useCart } from '../context/CartContext'
 import { useLDFlags } from '../hooks/useLDFlags'
-import { showToast } from './Toast'
+import { showToast } from '../lib/toast-bus'
 
 interface ProductCardProps {
   product: Product
@@ -13,6 +13,7 @@ interface ProductCardProps {
 export default function ProductCard({ product }: ProductCardProps) {
   const { addToCart } = useCart()
   const flags = useLDFlags()
+  const addToCartVisible = flags['show-product-card-add-to-cart']
   const isOnSale = !!product.originalPrice
 
   function handleAddToCart(e: React.MouseEvent) {
@@ -55,7 +56,9 @@ export default function ProductCard({ product }: ProductCardProps) {
           <button
             onClick={handleAddToCart}
             disabled={!product.inStock}
-            className="w-full rounded-lg bg-[#1B2A4A] py-2 text-sm font-medium text-white opacity-0 transition-opacity duration-150 hover:bg-[#B22234] group-hover:opacity-100 disabled:cursor-not-allowed disabled:bg-gray-300"
+            className={`w-full rounded-lg bg-[#1B2A4A] py-2 text-sm font-medium text-white transition-opacity duration-150 hover:bg-[#B22234] disabled:cursor-not-allowed disabled:bg-gray-300 ${
+              addToCartVisible ? 'opacity-100' : 'opacity-0 group-hover:opacity-100'
+            }`}
           >
             Add to Cart
           </button>

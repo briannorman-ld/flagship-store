@@ -28,7 +28,9 @@ async function bootstrap() {
         anonymous: false,
       }
     }
-  } catch {}
+  } catch {
+    /* ignore corrupt session JSON */
+  }
 
   let LDProvider: React.ComponentType<{ children: React.ReactNode }>
 

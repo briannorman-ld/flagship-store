@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useMemo } from 'react'
 import { useParams, Link } from 'react-router-dom'
 import type { Order } from '../types'
 import { useStoreMetricTrack } from '../hooks/useStoreMetricTrack'
@@ -7,14 +7,14 @@ import { STORE_METRIC_EVENTS } from '../analytics/storeMetricEvents'
 export default function OrderConfirmation() {
   const { orderId } = useParams<{ orderId: string }>()
   const trackMetric = useStoreMetricTrack()
-  const [order, setOrder] = useState<Order | null>(null)
-  const [show, setShow] = useState(false)
-
-  useEffect(() => {
-    const orders: Order[] = JSON.parse(localStorage.getItem('flagship_orders') || '[]')
-    const found = orders.find(o => o.id === orderId)
-    setOrder(found ?? null)
-    setTimeout(() => setShow(true), 100)
+  const order = useMemo(() => {
+    if (!orderId) return null
+    try {
+      const orders: Order[] = JSON.parse(localStorage.getItem('flagship_orders') || '[]')
+      return orders.find(o => o.id === orderId) ?? null
+    } catch {
+      return null
+    }
   }, [orderId])
 
   useEffect(() => {
@@ -36,7 +36,7 @@ export default function OrderConfirmation() {
 
   return (
     <div className="max-w-2xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
-      <div className={`text-center mb-10 transition-all duration-700 ${show ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-4'}`}>
+      <div className="text-center mb-10 transition-all duration-700 opacity-100 translate-y-0">
         <div className="text-7xl mb-4">✅</div>
         <h1 className="text-3xl font-extrabold text-gray-900 mb-2">
           Thank you, {order.shippingAddress.firstName}!

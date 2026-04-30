@@ -1,11 +1,11 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useMemo } from 'react'
 import { useNavigate, useSearchParams, Link } from 'react-router-dom'
 import { useAuth } from '../context/AuthContext'
 import { useWishlist } from '../context/WishlistContext'
 import { useCart } from '../context/CartContext'
 import { useLDFlags } from '../hooks/useLDFlags'
 import type { Order } from '../types'
-import { showToast } from '../components/Toast'
+import { showToast } from '../lib/toast-bus'
 import FlagImage from '../components/FlagImage'
 
 type Tab = 'profile' | 'orders' | 'wishlist' | 'addresses'
@@ -19,7 +19,15 @@ export default function Account() {
   const [searchParams] = useSearchParams()
   const defaultTab = (searchParams.get('tab') as Tab) ?? 'profile'
   const [tab, setTab] = useState<Tab>(defaultTab)
-  const [orders, setOrders] = useState<Order[]>([])
+  const orders = useMemo(() => {
+    if (!user?.orderIds?.length) return []
+    try {
+      const allOrders: Order[] = JSON.parse(localStorage.getItem('flagship_orders') || '[]')
+      return allOrders.filter(o => user.orderIds.includes(o.id))
+    } catch {
+      return []
+    }
+  }, [user])
   const [profileForm, setProfileForm] = useState({
     firstName: user?.firstName ?? '',
     lastName: user?.lastName ?? '',
@@ -29,14 +37,6 @@ export default function Account() {
   useEffect(() => {
     if (!isLoggedIn) navigate('/login', { state: { from: '/account' } })
   }, [isLoggedIn, navigate])
-
-  useEffect(() => {
-    const allOrders: Order[] = JSON.parse(localStorage.getItem('flagship_orders') || '[]')
-    const userOrders = user?.orderIds
-      ? allOrders.filter(o => user.orderIds.includes(o.id))
-      : []
-    setOrders(userOrders)
-  }, [user])
 
   if (!user) return null
 

@@ -1,3 +1,4 @@
+/* eslint-disable react-refresh/only-export-components -- Provider + hook pattern */
 import { createContext, useContext, useReducer, useEffect } from 'react'
 import type { ReactNode } from 'react'
 import type { CartItem, Product } from '../types'

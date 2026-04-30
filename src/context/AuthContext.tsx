@@ -1,3 +1,4 @@
+/* eslint-disable react-refresh/only-export-components -- Provider + hook pattern */
 import { createContext, useContext, useReducer, useEffect } from 'react'
 import type { ReactNode } from 'react'
 import type { User } from '../types'
@@ -55,7 +56,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         const user = JSON.parse(saved) as User
         return { user, isLoggedIn: true }
       }
-    } catch {}
+    } catch {
+      /* ignore invalid session JSON */
+    }
     return { user: null, isLoggedIn: false }
   })
 

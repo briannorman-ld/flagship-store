@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react'
+import { subscribeToasts, type ToastItem } from '../lib/toast-bus'
 
 interface ToastProps {
   message: string
@@ -26,32 +27,13 @@ export function Toast({ message, type = 'success', onClose }: ToastProps) {
   )
 }
 
-interface ToastItem {
-  id: number
-  message: string
-  type: 'success' | 'error' | 'info'
-}
-
-let toastId = 0
-const listeners: ((toast: ToastItem) => void)[] = []
-
-export function showToast(message: string, type: 'success' | 'error' | 'info' = 'success') {
-  const toast: ToastItem = { id: ++toastId, message, type }
-  listeners.forEach(l => l(toast))
-}
-
 export function ToastContainer() {
   const [toasts, setToasts] = useState<ToastItem[]>([])
 
   useEffect(() => {
-    const handler = (toast: ToastItem) => {
+    return subscribeToasts(toast => {
       setToasts(prev => [...prev, toast])
-    }
-    listeners.push(handler)
-    return () => {
-      const idx = listeners.indexOf(handler)
-      if (idx !== -1) listeners.splice(idx, 1)
-    }
+    })
   }, [])
 
   function remove(id: number) {

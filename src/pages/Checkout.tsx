@@ -4,7 +4,7 @@ import { useCart } from '../context/CartContext'
 import { useAuth } from '../context/AuthContext'
 import { useLDFlags } from '../hooks/useLDFlags'
 import type { Order, Address } from '../types'
-import { showToast } from '../components/Toast'
+import { showToast } from '../lib/toast-bus'
 import { useStoreMetricTrack } from '../hooks/useStoreMetricTrack'
 import { STORE_METRIC_EVENTS } from '../analytics/storeMetricEvents'
 
