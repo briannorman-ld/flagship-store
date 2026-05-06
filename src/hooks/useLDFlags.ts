@@ -34,6 +34,9 @@ const defaults: FlagSet = {
 
 export function useLDFlags(): FlagSet {
   const flags = useFlags()
+  /** E2E / CI only (`vite build --mode e2e` loads `.env.e2e`) — avoids needing a real LD client for Playwright. */
+  const playwrightAtcTreatment = import.meta.env.VITE_PLAYWRIGHT_ATC_TREATMENT === 'true'
+
   return {
     'show-promo-banner': flags['show-promo-banner'] ?? defaults['show-promo-banner'],
     'enable-express-checkout': flags['enable-express-checkout'] ?? defaults['enable-express-checkout'],
@@ -44,8 +47,9 @@ export function useLDFlags(): FlagSet {
     'show-sale-badge': flags['show-sale-badge'] ?? defaults['show-sale-badge'],
     'show-product-card-add-to-cart':
       flags['show-product-card-add-to-cart'] ?? defaults['show-product-card-add-to-cart'],
-    'eh-desktop-visible-card-atc-desktop':
-      flags['eh-desktop-visible-card-atc-desktop'] ?? defaults['eh-desktop-visible-card-atc-desktop'],
+    'eh-desktop-visible-card-atc-desktop': playwrightAtcTreatment
+      ? true
+      : (flags['eh-desktop-visible-card-atc-desktop'] ?? defaults['eh-desktop-visible-card-atc-desktop']),
     'checkout-progress-indicator': flags['checkout-progress-indicator'] ?? defaults['checkout-progress-indicator'],
     'free-shipping-threshold': flags['free-shipping-threshold'] ?? defaults['free-shipping-threshold'],
     'homepage-hero-variant': flags['homepage-hero-variant'] ?? defaults['homepage-hero-variant'],
