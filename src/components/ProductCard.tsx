@@ -4,21 +4,38 @@ import FlagImage from './FlagImage'
 import StarRating from './StarRating'
 import { useCart } from '../context/CartContext'
 import { useLDFlags } from '../hooks/useLDFlags'
+import { useStoreMetricTrack } from '../hooks/useStoreMetricTrack'
+import { STORE_METRIC_EVENTS } from '../analytics/storeMetricEvents'
 import { showToast } from '../lib/toast-bus'
 
 interface ProductCardProps {
   product: Product
+  /** Scopes homepage-only experiments and metrics attribution without changing PLP/Search/PDP cards. */
+  placement?: 'homepage' | 'listing' | 'related'
 }
 
-export default function ProductCard({ product }: ProductCardProps) {
+export default function ProductCard({ product, placement = 'listing' }: ProductCardProps) {
   const { addToCart } = useCart()
   const flags = useLDFlags()
-  const addToCartVisible = flags['show-product-card-add-to-cart']
+  const trackMetric = useStoreMetricTrack()
+  const addToCartVisible =
+    flags['show-product-card-add-to-cart'] ||
+    (placement === 'homepage' && flags['eh-desktop-visible-card-atc-desktop'])
   const isOnSale = !!product.originalPrice
 
   function handleAddToCart(e: React.MouseEvent) {
     e.preventDefault()
     addToCart(product, 1, product.sizes[0], product.material[0])
+    trackMetric(STORE_METRIC_EVENTS.addToCart, {
+      productId: product.id,
+      category: product.category,
+      quantity: 1,
+      size: product.sizes[0],
+      material: product.material[0],
+      placement,
+      source: 'product-card',
+      experimentKey: placement === 'homepage' ? 'eh-desktop-visible-card-atc-desktop' : undefined,
+    })
     showToast(`${product.name} added to cart`)
   }
 
