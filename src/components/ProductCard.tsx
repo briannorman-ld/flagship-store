@@ -4,21 +4,38 @@ import FlagImage from './FlagImage'
 import StarRating from './StarRating'
 import { useCart } from '../context/CartContext'
 import { useLDFlags } from '../hooks/useLDFlags'
+import { useStoreMetricTrack } from '../hooks/useStoreMetricTrack'
+import { STORE_METRIC_EVENTS } from '../analytics/storeMetricEvents'
 import { showToast } from '../lib/toast-bus'
 
 interface ProductCardProps {
   product: Product
+  /** True for homepage merchandising cards covered by the desktop visible-ATC experiment. */
+  surface?: 'homepage' | 'listing'
 }
 
-export default function ProductCard({ product }: ProductCardProps) {
+export default function ProductCard({ product, surface = 'listing' }: ProductCardProps) {
   const { addToCart } = useCart()
   const flags = useLDFlags()
-  const addToCartVisible = flags['show-product-card-add-to-cart']
+  const trackMetric = useStoreMetricTrack()
+  const isHomepageCard = surface === 'homepage'
+  const addToCartVisible = flags['show-product-card-add-to-cart'] || (isHomepageCard && flags['eh-desktop-visible-card-atc-desktop'])
   const isOnSale = !!product.originalPrice
 
   function handleAddToCart(e: React.MouseEvent) {
     e.preventDefault()
-    addToCart(product, 1, product.sizes[0], product.material[0])
+    const size = product.sizes[0]
+    const material = product.material[0]
+    addToCart(product, 1, size, material)
+    trackMetric(STORE_METRIC_EVENTS.addToCart, {
+      productId: product.id,
+      category: product.category,
+      quantity: 1,
+      size,
+      material,
+      surface,
+      source: isHomepageCard ? 'homepage-product-card' : 'product-card',
+    })
     showToast(`${product.name} added to cart`)
   }
 
