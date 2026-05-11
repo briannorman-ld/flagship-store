@@ -9,4 +9,7 @@ export const STORE_METRIC_EVENTS = {
   cartView: 'flagship-store-cart-view',
   checkoutStart: 'flagship-store-checkout-start',
   orderConfirmation: 'flagship-store-order-confirmation',
+  promoBannerViewed: 'promo_banner_viewed',
+  promoCodeCopied: 'promo_code_copied',
+  cartIconClicked: 'cart_icon_clicked',
 } as const
