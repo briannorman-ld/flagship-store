@@ -10,6 +10,8 @@ export interface FlagSet {
   'show-sale-badge': boolean
   /** When true, product card "Add to Cart" is visible without hovering the card. */
   'show-product-card-add-to-cart': boolean
+  /** Desktop newsletter copy test: false = generic control, true = concrete 10% incentive. */
+  'eh-desktop-newsletter-incentive-desktop': boolean
   'checkout-progress-indicator': boolean
   'free-shipping-threshold': number
   'homepage-hero-variant': string
@@ -24,6 +26,7 @@ const defaults: FlagSet = {
   'enable-wishlist': true,
   'show-sale-badge': true,
   'show-product-card-add-to-cart': false,
+  'eh-desktop-newsletter-incentive-desktop': false,
   'checkout-progress-indicator': true,
   'free-shipping-threshold': 75,
   'homepage-hero-variant': 'control',
@@ -45,6 +48,8 @@ export function useLDFlags(): FlagSet {
     'show-product-card-add-to-cart': playwrightAtcTreatment
       ? true
       : (flags['show-product-card-add-to-cart'] ?? defaults['show-product-card-add-to-cart']),
+    'eh-desktop-newsletter-incentive-desktop':
+      flags['eh-desktop-newsletter-incentive-desktop'] ?? defaults['eh-desktop-newsletter-incentive-desktop'],
     'checkout-progress-indicator': flags['checkout-progress-indicator'] ?? defaults['checkout-progress-indicator'],
     'free-shipping-threshold': flags['free-shipping-threshold'] ?? defaults['free-shipping-threshold'],
     'homepage-hero-variant': flags['homepage-hero-variant'] ?? defaults['homepage-hero-variant'],
