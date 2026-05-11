@@ -1,73 +1,54 @@
-# React + TypeScript + Vite
+# Flagship Store
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+React + TypeScript + Vite storefront demo (routing under `/flagship-store`, LaunchDarkly-ready).
 
-Currently, two official plugins are available:
+## Prerequisites
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Oxc](https://oxc.rs)
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/)
+- [Node.js](https://nodejs.org/) **20+** (LTS recommended)
+- [npm](https://docs.npmjs.com/cli/) (ships with Node)
 
-## React Compiler
+## Run locally
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+1. **Install dependencies**
 
-## Expanding the ESLint configuration
+   ```bash
+   npm install
+   ```
 
-If you are developing a production application, we recommend updating the configuration to enable type-aware lint rules:
+2. **Environment (optional)**
 
-```js
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
+   Copy the example env file. LaunchDarkly is optional for local dev; without a client ID the app still runs and uses flag defaults.
 
-      // Remove tseslint.configs.recommended and replace with this
-      tseslint.configs.recommendedTypeChecked,
-      // Alternatively, use this for stricter rules
-      tseslint.configs.strictTypeChecked,
-      // Optionally, add this for stylistic rules
-      tseslint.configs.stylisticTypeChecked,
+   ```bash
+   cp .env.example .env
+   ```
 
-      // Other configs...
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
-```
+   Edit `.env` and set `VITE_LD_CLIENT_ID` if you want live flags. Get a **Client-side ID** from your LaunchDarkly project (Client-side SDK).
 
-You can also install [eslint-plugin-react-x](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-x) and [eslint-plugin-react-dom](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-dom) for React-specific lint rules:
+3. **Start the dev server**
 
-```js
-// eslint.config.js
-import reactX from 'eslint-plugin-react-x'
-import reactDom from 'eslint-plugin-react-dom'
+   ```bash
+   npm run dev
+   ```
 
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
-      // Enable lint rules for React
-      reactX.configs['recommended-typescript'],
-      // Enable lint rules for React DOM
-      reactDom.configs.recommended,
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
-```
+4. **Open the app**
+
+   Vite prints a local URL (usually `http://localhost:5173`). Because the app uses the path prefix `/flagship-store`, open:
+
+   **`http://localhost:5173/flagship-store/`**
+
+   (Trailing slash is fine; the important part is the `/flagship-store` base path.)
+
+## Common commands
+
+| Command | Purpose |
+| --- | --- |
+| `npm run dev` | Dev server with HMR |
+| `npm run build` | Production build to `dist/` |
+| `npm run preview` | Serve the production build locally |
+| `npm run lint` | ESLint |
+| `npm run test:e2e` | Playwright E2E (builds with `build:e2e`, starts preview server; see `playwright.config.ts`) |
+
+## Deploy notes
+
+`vite.config.ts` sets `base: '/flagship-store/'` for GitHub Pages. `npm run deploy` runs `predeploy` (build) then publishes `dist/` via `gh-pages`.
