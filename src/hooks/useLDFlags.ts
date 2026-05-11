@@ -13,6 +13,8 @@ export interface FlagSet {
   'checkout-progress-indicator': boolean
   'free-shipping-threshold': number
   'homepage-hero-variant': string
+  /** Experiment: route desktop hero "Browse All Categories" to the category hub instead of one PLP. */
+  'eh-desktop-nav-shop-all-destination-desktop': boolean
 }
 
 const defaults: FlagSet = {
@@ -27,6 +29,7 @@ const defaults: FlagSet = {
   'checkout-progress-indicator': true,
   'free-shipping-threshold': 75,
   'homepage-hero-variant': 'control',
+  'eh-desktop-nav-shop-all-destination-desktop': false,
 }
 
 export function useLDFlags(): FlagSet {
@@ -48,5 +51,6 @@ export function useLDFlags(): FlagSet {
     'checkout-progress-indicator': flags['checkout-progress-indicator'] ?? defaults['checkout-progress-indicator'],
     'free-shipping-threshold': flags['free-shipping-threshold'] ?? defaults['free-shipping-threshold'],
     'homepage-hero-variant': flags['homepage-hero-variant'] ?? defaults['homepage-hero-variant'],
+    'eh-desktop-nav-shop-all-destination-desktop': flags['eh-desktop-nav-shop-all-destination-desktop'] ?? defaults['eh-desktop-nav-shop-all-destination-desktop'],
   }
 }
