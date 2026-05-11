@@ -34,23 +34,16 @@ const svgFlags: Record<string, string> = {
   'specialty/garden-stake.svg': `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 3 2"><rect width="3" height="2" fill="#f5f5f5"/><rect x="1.35" y="0.2" width="0.3" height="1.6" fill="#333" rx="0.05"/><rect x="1.1" y="1.6" width="0.8" height="0.2" fill="#333" rx="0.05"/></svg>`,
 }
 
-// Wikimedia-hosted state and specialty flags
-const remoteFlags: Record<string, string> = {
-  'states/california.svg': 'https://upload.wikimedia.org/wikipedia/commons/0/01/Flag_of_California.svg',
-  'states/texas.svg': 'https://upload.wikimedia.org/wikipedia/commons/f/f7/Flag_of_Texas.svg',
-  'states/new-york.svg': 'https://upload.wikimedia.org/wikipedia/commons/1/1a/Flag_of_New_York.svg',
-  'states/florida.svg': 'https://upload.wikimedia.org/wikipedia/commons/f/f7/Flag_of_Florida.svg',
-  'states/colorado.svg': 'https://upload.wikimedia.org/wikipedia/commons/4/46/Flag_of_Colorado.svg',
-  'states/alaska.svg': 'https://upload.wikimedia.org/wikipedia/commons/e/e6/Flag_of_Alaska.svg',
-  'states/hawaii.svg': 'https://upload.wikimedia.org/wikipedia/commons/e/ef/Flag_of_Hawaii.svg',
-  'states/montana.svg': 'https://upload.wikimedia.org/wikipedia/commons/c/cb/Flag_of_Montana.svg',
-  'states/arizona.svg': 'https://upload.wikimedia.org/wikipedia/commons/9/9d/Flag_of_Arizona.svg',
-  'states/oregon.svg': 'https://upload.wikimedia.org/wikipedia/commons/b/b9/Flag_of_Oregon.svg',
-  'states/north-carolina.svg': 'https://upload.wikimedia.org/wikipedia/commons/b/bb/Flag_of_North_Carolina.svg',
-  'states/georgia.svg': 'https://upload.wikimedia.org/wikipedia/commons/5/54/Flag_of_Georgia_%28U.S._state%29.svg',
-  'states/washington-state.svg': 'https://upload.wikimedia.org/wikipedia/commons/5/54/Flag_of_Washington.svg',
-  'states/vermont.svg': 'https://upload.wikimedia.org/wikipedia/commons/4/49/Flag_of_Vermont.svg',
-  'states/virginia.svg': 'https://upload.wikimedia.org/wikipedia/commons/4/47/Flag_of_Virginia.svg',
+/** `states/{kebab}.svg` → Wikimedia Commons SVG via stable redirect (avoids hard-coding upload shard paths). */
+function commonsStateFlagUrl(flagImagePath: string): string | null {
+  const m = /^states\/([\w-]+)\.svg$/.exec(flagImagePath)
+  if (!m) return null
+  const slug = m[1]
+  const filename =
+    slug === 'georgia'
+      ? 'Flag_of_Georgia_(U.S._state).svg'
+      : `Flag_of_${slug.split('-').map((w) => w.charAt(0).toUpperCase() + w.slice(1)).join('_')}.svg`
+  return `https://commons.wikimedia.org/wiki/Special:FilePath/${encodeURIComponent(filename)}`
 }
 
 // Country flags via flag-icons CDN
@@ -76,8 +69,9 @@ export default function FlagImage({ flagImagePath, isoCode, alt, size = 'card' }
 
   if (isoCode && flagImagePath.startsWith('country/')) {
     src = countryFlagCdn(isoCode)
-  } else if (remoteFlags[flagImagePath]) {
-    src = remoteFlags[flagImagePath]
+  } else if (flagImagePath.startsWith('states/') && flagImagePath.endsWith('.svg')) {
+    const stateUrl = commonsStateFlagUrl(flagImagePath)
+    if (stateUrl) src = stateUrl
   } else if (svgFlags[flagImagePath]) {
     svgContent = svgFlags[flagImagePath]
   }

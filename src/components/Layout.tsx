@@ -38,28 +38,14 @@ export default function Layout({ children }: { children: React.ReactNode }) {
       {/* Promo banner */}
       {flags['show-promo-banner'] && (
         <div className="flex items-stretch justify-center bg-[#0f1729]">
-          <div className="flex max-w-5xl w-full mx-auto shadow-md">
-            <div className="flex items-center bg-[#3C3B6E] pl-2 pr-1.5 sm:pl-4 sm:pr-2 border-y border-l border-white/15 rounded-l-md">
-              <span
-                className="fi fi-us rounded shadow-md border border-black/20 overflow-hidden leading-none"
-                style={{ fontSize: 'clamp(1.25rem, 3vw, 1.75rem)' }}
-                title="United States"
-              />
-            </div>
-            <div className="flex-1 bg-[#B22234] text-white text-center text-xs sm:text-sm py-2.5 px-2 sm:px-5 flex items-center justify-center gap-1 sm:gap-2 border-y border-[#8B1538] leading-snug">
+          <div className="max-w-5xl w-full mx-auto shadow-md px-3 sm:px-4 py-2">
+            <div className="bg-[#B22234] text-white text-center text-xs sm:text-sm py-2.5 px-2 sm:px-5 flex items-center justify-center gap-1 sm:gap-2 border border-[#8B1538] rounded-md leading-snug">
               <span>
                 Free shipping on orders over ${flags['free-shipping-threshold']}
                 <span className="hidden sm:inline"> &nbsp;|&nbsp; </span>
                 <span className="sm:hidden"> · </span>
                 Use code <span className="font-bold">FLAGSHIP20</span> for 20% off
               </span>
-            </div>
-            <div className="flex items-center bg-[#3C3B6E] pr-2 pl-1.5 sm:pr-4 sm:pl-2 border-y border-r border-white/15 rounded-r-md">
-              <span
-                className="fi fi-us rounded shadow-md border border-black/20 overflow-hidden leading-none"
-                style={{ fontSize: 'clamp(1.25rem, 3vw, 1.75rem)' }}
-                title="United States"
-              />
             </div>
           </div>
         </div>

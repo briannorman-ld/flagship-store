@@ -1,4 +1,5 @@
 import type { Product } from '../types'
+import { usStateProducts } from './usStateCatalog'
 
 export const products: Product[] = [
   // ── AMERICAN FLAGS ──────────────────────────────────────────
@@ -65,112 +66,8 @@ export const products: Product[] = [
     flagImagePath: 'country/us.svg', isoCode: 'us',
   },
 
-  // ── STATE FLAGS ──────────────────────────────────────────────
-  {
-    id: 'state-ca', name: 'California State Flag', category: 'state', price: 24.99,
-    description: 'The Bear Republic flag featuring the iconic grizzly bear and lone star. Printed on durable nylon with vivid colors that hold up in coastal conditions.',
-    sizes: ['2×3 ft', '3×5 ft', '4×6 ft'], material: ['Nylon', 'Polyester'],
-    rating: 4.7, reviewCount: 134, inStock: true, featured: true,
-    flagImagePath: 'states/california.svg',
-  },
-  {
-    id: 'state-tx', name: 'Texas State Flag', category: 'state', price: 24.99,
-    description: 'The Lone Star flag of Texas. Bold single star on blue and red fields — one of the most recognized state flags in the nation.',
-    sizes: ['2×3 ft', '3×5 ft', '4×6 ft'], material: ['Nylon', 'Polyester'],
-    rating: 4.9, reviewCount: 287, inStock: true, featured: true,
-    flagImagePath: 'states/texas.svg',
-  },
-  {
-    id: 'state-ny', name: 'New York State Flag', category: 'state', price: 24.99,
-    description: 'Features the state coat of arms on a deep blue field. A distinguished flag representing the Empire State.',
-    sizes: ['2×3 ft', '3×5 ft', '4×6 ft'], material: ['Nylon', 'Polyester'],
-    rating: 4.5, reviewCount: 98, inStock: true, featured: false,
-    flagImagePath: 'states/new-york.svg',
-  },
-  {
-    id: 'state-fl', name: 'Florida State Flag', category: 'state', price: 24.99,
-    description: "Florida's distinctive red saltire with the state seal on a white field. A bold design that stands out on any flagpole.",
-    sizes: ['2×3 ft', '3×5 ft', '4×6 ft'], material: ['Nylon', 'Polyester'],
-    rating: 4.6, reviewCount: 112, inStock: true, featured: false,
-    flagImagePath: 'states/florida.svg',
-  },
-  {
-    id: 'state-co', name: 'Colorado State Flag', category: 'state', price: 24.99,
-    description: 'One of the most visually striking state flags — bold horizontal stripes of blue, white, and blue with the iconic red C and golden disk.',
-    sizes: ['2×3 ft', '3×5 ft', '4×6 ft'], material: ['Nylon', 'Polyester'],
-    rating: 4.8, reviewCount: 176, inStock: true, featured: true,
-    flagImagePath: 'states/colorado.svg',
-  },
-  {
-    id: 'state-ak', name: 'Alaska State Flag', category: 'state', price: 24.99,
-    description: "The Big Dipper and North Star shine on a deep blue field. Designed by a 13-year-old in 1927, Alaska's flag is one of the most beloved in the nation.",
-    sizes: ['2×3 ft', '3×5 ft', '4×6 ft'], material: ['Nylon', 'Polyester'],
-    rating: 4.9, reviewCount: 91, inStock: true, featured: false,
-    flagImagePath: 'states/alaska.svg',
-  },
-  {
-    id: 'state-hi', name: 'Hawaii State Flag', category: 'state', price: 24.99,
-    description: "The only US state flag to feature the Union Jack, honoring Hawaii's historic ties with Britain. Eight stripes represent the eight main islands.",
-    sizes: ['2×3 ft', '3×5 ft', '4×6 ft'], material: ['Nylon', 'Polyester'],
-    rating: 4.7, reviewCount: 103, inStock: true, featured: false,
-    flagImagePath: 'states/hawaii.svg',
-  },
-  {
-    id: 'state-mt', name: 'Montana State Flag', category: 'state', price: 23.99,
-    description: "Montana's blue flag features the state seal above the state name in gold — a classic design representing Big Sky Country.",
-    sizes: ['2×3 ft', '3×5 ft', '4×6 ft'], material: ['Nylon', 'Polyester'],
-    rating: 4.6, reviewCount: 54, inStock: true, featured: false,
-    flagImagePath: 'states/montana.svg',
-  },
-  {
-    id: 'state-az', name: 'Arizona State Flag', category: 'state', price: 24.99,
-    description: "Arizona's stunning copper star radiates red and gold rays over a blue lower half — one of the most visually dynamic state flags in America.",
-    sizes: ['2×3 ft', '3×5 ft', '4×6 ft'], material: ['Nylon', 'Polyester'],
-    rating: 4.9, reviewCount: 142, inStock: true, featured: true,
-    flagImagePath: 'states/arizona.svg',
-  },
-  {
-    id: 'state-or', name: 'Oregon State Flag', category: 'state', price: 24.99,
-    description: 'The only US state flag with different designs on each side. The front features the state shield; the reverse shows a beaver. Navy blue and gold.',
-    sizes: ['2×3 ft', '3×5 ft', '4×6 ft'], material: ['Nylon', 'Polyester'],
-    rating: 4.5, reviewCount: 67, inStock: true, featured: false,
-    flagImagePath: 'states/oregon.svg',
-  },
-  {
-    id: 'state-nc', name: 'North Carolina State Flag', category: 'state', price: 22.99,
-    description: "North Carolina's classic flag features the state initials and dates of the Mecklenburg Declaration and Halifax Resolves on a rich red, white, and blue design.",
-    sizes: ['2×3 ft', '3×5 ft', '4×6 ft'], material: ['Nylon', 'Polyester'],
-    rating: 4.4, reviewCount: 43, inStock: true, featured: false,
-    flagImagePath: 'states/north-carolina.svg',
-  },
-  {
-    id: 'state-ga', name: 'Georgia State Flag', category: 'state', price: 22.99,
-    description: "Georgia's flag features the state seal with three pillars representing the three branches of government, surrounded by 13 stars, on a bold blue and red design.",
-    sizes: ['2×3 ft', '3×5 ft', '4×6 ft'], material: ['Nylon', 'Polyester'],
-    rating: 4.6, reviewCount: 78, inStock: true, featured: false,
-    flagImagePath: 'states/georgia.svg',
-  },
-  {
-    id: 'state-wa', name: 'Washington State Flag', category: 'state', price: 24.99,
-    description: "The only state flag with a green field and a president's portrait — George Washington's likeness on a dark green background. A unique and striking design.",
-    sizes: ['2×3 ft', '3×5 ft', '4×6 ft'], material: ['Nylon', 'Polyester'],
-    rating: 4.7, reviewCount: 88, inStock: true, featured: false,
-    flagImagePath: 'states/washington-state.svg',
-  },
-  {
-    id: 'state-vt', name: 'Vermont State Flag', category: 'state', price: 22.99,
-    description: "Vermont's deep blue flag features the state coat of arms with pine tree, cow, and sheaves of wheat — symbols of the Green Mountain State's natural heritage.",
-    sizes: ['2×3 ft', '3×5 ft', '4×6 ft'], material: ['Nylon', 'Polyester'],
-    rating: 4.3, reviewCount: 31, inStock: true, featured: false,
-    flagImagePath: 'states/vermont.svg',
-  },
-  {
-    id: 'state-va', name: 'Virginia State Flag', category: 'state', price: 23.99,
-    description: "Virginia's deep blue flag features the state seal with the Roman goddess Virtus standing victorious — and the state motto 'Sic Semper Tyrannis.'",
-    sizes: ['2×3 ft', '3×5 ft', '4×6 ft'], material: ['Nylon', 'Polyester'],
-    rating: 4.5, reviewCount: 56, inStock: true, featured: false,
-    flagImagePath: 'states/virginia.svg',
-  },
+  // ── STATE FLAGS (all 50 states; see `usStateCatalog.ts`) ─────
+  ...usStateProducts,
 
   // ── COUNTRY FLAGS ────────────────────────────────────────────
   {

@@ -7,7 +7,7 @@ import { STORE_METRIC_EVENTS } from '../analytics/storeMetricEvents'
 
 const ITEMS_PER_PAGE = 12
 
-type SortOption = 'featured' | 'price-asc' | 'price-desc' | 'rating'
+type SortOption = 'featured' | 'name-asc' | 'price-asc' | 'price-desc' | 'rating'
 
 export default function CategoryPLP() {
   const { slug } = useParams<{ slug: string }>()
@@ -27,6 +27,8 @@ export default function CategoryPLP() {
     let list = slug ? products.filter(p => p.category === slug) : products
     list = list.filter(p => p.price <= maxPrice)
     switch (sort) {
+      case 'name-asc':
+        return [...list].sort((a, b) => a.name.localeCompare(b.name, undefined, { sensitivity: 'base' }))
       case 'price-asc': return [...list].sort((a, b) => a.price - b.price)
       case 'price-desc': return [...list].sort((a, b) => b.price - a.price)
       case 'rating': return [...list].sort((a, b) => b.rating - a.rating)
@@ -110,6 +112,7 @@ export default function CategoryPLP() {
               className="border border-gray-200 rounded-lg px-3 py-2 text-sm text-gray-700 focus:outline-none focus:ring-2 focus:ring-[#1B2A4A]"
             >
               <option value="featured">Featured</option>
+              <option value="name-asc">Name (A–Z)</option>
               <option value="price-asc">Price: Low to High</option>
               <option value="price-desc">Price: High to Low</option>
               <option value="rating">Best Rating</option>

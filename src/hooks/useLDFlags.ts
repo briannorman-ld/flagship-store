@@ -1,6 +1,17 @@
 import { useFlags } from 'launchdarkly-react-client-sdk'
 
-export interface FlagSet {
+import { STATE_CATALOG_PRODUCT_IDS, type StateCatalogProductId } from '../data/usStateCatalog'
+
+/** LD keys for state SKUs: `show-state-{postal}` (e.g. `show-state-ca`). */
+type StateShowFlagKey = `show-${StateCatalogProductId}`
+
+type StateShowFlags = { [K in StateShowFlagKey]: boolean }
+
+const stateShowDefaults: StateShowFlags = Object.fromEntries(
+  STATE_CATALOG_PRODUCT_IDS.map((id) => [`show-${id}`, true]),
+) as StateShowFlags
+
+export interface FlagSet extends StateShowFlags {
   'show-promo-banner': boolean
   'enable-express-checkout': boolean
   'show-product-recommendations': boolean
@@ -15,7 +26,8 @@ export interface FlagSet {
   'homepage-hero-variant': string
 }
 
-const defaults: FlagSet = {
+const defaults: Omit<FlagSet, keyof StateShowFlags> & StateShowFlags = {
+  ...stateShowDefaults,
   'show-promo-banner': true,
   'enable-express-checkout': true,
   'show-product-recommendations': true,
@@ -29,12 +41,22 @@ const defaults: FlagSet = {
   'homepage-hero-variant': 'control',
 }
 
+function stateShowFromFlags(flags: ReturnType<typeof useFlags>): StateShowFlags {
+  const out = { ...stateShowDefaults }
+  for (const id of STATE_CATALOG_PRODUCT_IDS) {
+    const key = `show-${id}` as StateShowFlagKey
+    out[key] = (flags[key] as boolean | undefined) ?? defaults[key]
+  }
+  return out
+}
+
 export function useLDFlags(): FlagSet {
   const flags = useFlags()
   /** E2E / CI only (`vite build --mode e2e` loads `.env.e2e`) — avoids needing a real LD client for Playwright. */
   const playwrightAtcTreatment = import.meta.env.VITE_PLAYWRIGHT_ATC_TREATMENT === 'true'
 
   return {
+    ...stateShowFromFlags(flags),
     'show-promo-banner': flags['show-promo-banner'] ?? defaults['show-promo-banner'],
     'enable-express-checkout': flags['enable-express-checkout'] ?? defaults['enable-express-checkout'],
     'show-product-recommendations': flags['show-product-recommendations'] ?? defaults['show-product-recommendations'],
