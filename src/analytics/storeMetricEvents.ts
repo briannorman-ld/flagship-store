@@ -9,4 +9,7 @@ export const STORE_METRIC_EVENTS = {
   cartView: 'flagship-store-cart-view',
   checkoutStart: 'flagship-store-checkout-start',
   orderConfirmation: 'flagship-store-order-confirmation',
+  newsletterEmailFocus: 'flagship-store-newsletter-email-focus',
+  newsletterSignupSubmitted: 'flagship-store-newsletter-signup-submitted',
+  newsletterFormAbandoned: 'flagship-store-newsletter-form-abandoned',
 } as const
