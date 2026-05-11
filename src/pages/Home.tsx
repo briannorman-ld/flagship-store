@@ -50,6 +50,9 @@ const heroImageSrc = `${import.meta.env.BASE_URL}hero-american-flag-mountains.jp
 export default function Home() {
   const flags = useLDFlags()
   const heroVariant = flags['homepage-hero-variant']
+  const browseAllCategoriesHref = flags['eh-desktop-nav-shop-all-destination-desktop']
+    ? '/#shop-by-category'
+    : '/flags/nautical'
 
   return (
     <div>
@@ -98,7 +101,7 @@ export default function Home() {
               <Link to="/flags/american" className="bg-[#B22234] text-white font-semibold px-8 py-3 rounded-lg hover:bg-red-700 transition-colors shadow-lg">
                 Shop American Flags
               </Link>
-              <Link to="/flags/nautical" className="bg-white/15 backdrop-blur-sm text-white font-semibold px-8 py-3 rounded-lg hover:bg-white/25 transition-colors border border-white/20">
+              <Link to={browseAllCategoriesHref} className="bg-white/15 backdrop-blur-sm text-white font-semibold px-8 py-3 rounded-lg hover:bg-white/25 transition-colors border border-white/20">
                 Browse All Categories
               </Link>
             </div>
@@ -119,91 +122,59 @@ export default function Home() {
       )}
 
       {/* Category cards */}
-      <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-14">
+      <section id="shop-by-category" className="scroll-mt-20 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-14">
         <h2 className="text-2xl font-bold text-gray-900 mb-6">Shop by Category</h2>
         <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
           {categoryCards.map(({ slug, emoji, bg }) => (
             <Link
               key={slug}
               to={`/flags/${slug}`}
-              className={`bg-gradient-to-br ${bg} text-white rounded-xl py-2.5 px-3 flex flex-row items-center justify-center gap-2.5 hover:scale-[1.02] transition-transform shadow-md aspect-[3/1]`}
+              className={`bg-gradient-to-br ${bg} text-white rounded-xl py-2.5 px-3 flex flex-col items-center justify-center text-center min-h-[120px] hover:scale-[1.02] transition-transform shadow-sm`}
             >
-              <span className="text-2xl shrink-0">{emoji}</span>
-              <span className="font-semibold text-center text-xs sm:text-sm leading-tight">{categoryMeta[slug].label}</span>
-            </Link>
-          ))}
-        </div>
-        <div className="mt-4 grid grid-cols-2 md:grid-cols-4 gap-4">
-          {Object.entries(categoryMeta).slice(4).map(([slug, meta]) => (
-            <Link
-              key={slug}
-              to={`/flags/${slug}`}
-              className="border border-gray-200 text-gray-700 rounded-xl p-4 flex items-center gap-3 hover:border-[#1B2A4A] hover:bg-gray-50 transition-colors"
-            >
-              <span className="font-medium text-sm">{meta.label} →</span>
+              <span className="text-4xl mb-3">{emoji}</span>
+              <span className="font-semibold">{categoryMeta[slug].label}</span>
+              <span className="text-xs text-white/80 mt-1">{categoryMeta[slug].description}</span>
             </Link>
           ))}
         </div>
       </section>
 
-      {/* Best Sellers */}
-      <section className="bg-gray-50 py-14">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex items-center justify-between mb-6">
-            <h2 className="text-2xl font-bold text-gray-900">Best Sellers</h2>
-            <Link to="/" className="text-sm text-[#B22234] font-medium hover:underline">Shop all →</Link>
-          </div>
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-5">
-            {bestSellerProducts.map(p => <ProductCard key={p.id} product={p} />)}
-          </div>
-        </div>
-      </section>
-
-      {/* Trust bar */}
+      {/* Best sellers */}
       <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-14">
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-6 text-center">
-          {[
-            { icon: '🇺🇸', title: 'Made in USA Options', desc: 'Proudly American-made flags available' },
-            { icon: '🚚', title: 'Fast Shipping', desc: 'Most orders ship within 1 business day' },
-            { icon: '✅', title: 'Satisfaction Guaranteed', desc: '30-day returns on all items' },
-            { icon: '📦', title: 'Bulk Discounts', desc: 'Save more when you order in quantity' },
-          ].map(item => (
-            <div key={item.title} className="flex flex-col items-center gap-2 p-4">
-              <span className="text-3xl">{item.icon}</span>
-              <h3 className="font-semibold text-gray-900 text-sm">{item.title}</h3>
-              <p className="text-xs text-gray-500">{item.desc}</p>
-            </div>
+        <div className="flex items-end justify-between mb-6">
+          <div>
+            <h2 className="text-2xl font-bold text-gray-900">Best Sellers</h2>
+            <p className="text-sm text-gray-500 mt-1">Customer favorites across our most popular categories.</p>
+          </div>
+          <Link to="/flags/american" className="hidden sm:inline text-sm font-medium text-[#B22234] hover:underline">
+            Shop best sellers →
+          </Link>
+        </div>
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-5">
+          {bestSellerProducts.map(product => (
+            <ProductCard key={product.id} product={product} />
           ))}
         </div>
       </section>
 
-      {/* New Arrivals */}
+      {/* New arrivals */}
       <section className="bg-gray-50 py-14">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex items-center justify-between mb-6">
-            <h2 className="text-2xl font-bold text-gray-900">New Arrivals</h2>
-            <Link to="/flags/garden" className="text-sm text-[#B22234] font-medium hover:underline">View all →</Link>
+          <div className="flex items-end justify-between mb-6">
+            <div>
+              <h2 className="text-2xl font-bold text-gray-900">New Arrivals</h2>
+              <p className="text-sm text-gray-500 mt-1">Fresh additions to the FlagShip catalog.</p>
+            </div>
+            <Link to="/search?q=new" className="hidden sm:inline text-sm font-medium text-[#B22234] hover:underline">
+              View new arrivals →
+            </Link>
           </div>
           <div className="grid grid-cols-2 md:grid-cols-4 gap-5">
-            {newArrivals.map(p => <ProductCard key={p.id} product={p} />)}
+            {newArrivals.map(product => (
+              <ProductCard key={product.id} product={product} />
+            ))}
           </div>
         </div>
-      </section>
-
-      {/* Email signup */}
-      <section className="bg-[#1B2A4A] text-white py-14 px-4 text-center">
-        <h2 className="text-2xl font-bold mb-2">Stay in the Loop</h2>
-        <p className="text-gray-300 mb-6">Get new products and exclusive deals delivered to your inbox.</p>
-        <form className="flex flex-col sm:flex-row gap-3 max-w-md mx-auto" onSubmit={e => e.preventDefault()}>
-          <input
-            type="email"
-            placeholder="Enter your email"
-            className="flex-1 px-4 py-3 rounded-lg text-gray-900 outline-none"
-          />
-          <button type="submit" className="bg-[#B22234] text-white font-semibold px-6 py-3 rounded-lg hover:bg-red-700 transition-colors whitespace-nowrap">
-            Subscribe
-          </button>
-        </form>
       </section>
     </div>
   )
