@@ -11,6 +11,8 @@ const stateShowDefaults: StateShowFlags = Object.fromEntries(
   STATE_CATALOG_PRODUCT_IDS.map((id) => [`show-${id}`, true]),
 ) as StateShowFlags
 
+export const PDP_SHIPPING_THRESHOLD_INLINE_FOLLOWUP_FLAG = 'eh-desktop-shipping-threshold-inline-followup-desktop'
+
 export interface FlagSet extends StateShowFlags {
   'show-promo-banner': boolean
   'enable-express-checkout': boolean
@@ -24,6 +26,7 @@ export interface FlagSet extends StateShowFlags {
   'checkout-progress-indicator': boolean
   'free-shipping-threshold': number
   'homepage-hero-variant': string
+  [PDP_SHIPPING_THRESHOLD_INLINE_FOLLOWUP_FLAG]: boolean
 }
 
 const defaults: Omit<FlagSet, keyof StateShowFlags> & StateShowFlags = {
@@ -39,6 +42,7 @@ const defaults: Omit<FlagSet, keyof StateShowFlags> & StateShowFlags = {
   'checkout-progress-indicator': true,
   'free-shipping-threshold': 75,
   'homepage-hero-variant': 'control',
+  [PDP_SHIPPING_THRESHOLD_INLINE_FOLLOWUP_FLAG]: false,
 }
 
 function stateShowFromFlags(flags: ReturnType<typeof useFlags>): StateShowFlags {
@@ -70,5 +74,7 @@ export function useLDFlags(): FlagSet {
     'checkout-progress-indicator': flags['checkout-progress-indicator'] ?? defaults['checkout-progress-indicator'],
     'free-shipping-threshold': flags['free-shipping-threshold'] ?? defaults['free-shipping-threshold'],
     'homepage-hero-variant': flags['homepage-hero-variant'] ?? defaults['homepage-hero-variant'],
+    [PDP_SHIPPING_THRESHOLD_INLINE_FOLLOWUP_FLAG]:
+      flags[PDP_SHIPPING_THRESHOLD_INLINE_FOLLOWUP_FLAG] ?? defaults[PDP_SHIPPING_THRESHOLD_INLINE_FOLLOWUP_FLAG],
   }
 }
