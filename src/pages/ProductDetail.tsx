@@ -7,11 +7,14 @@ import StarRating from '../components/StarRating'
 import ProductCard from '../components/ProductCard'
 import { useCart } from '../context/CartContext'
 import { useWishlist } from '../context/WishlistContext'
-import { useLDFlags } from '../hooks/useLDFlags'
+import { DESKTOP_DEFAULT_POPULAR_SIZE_FLAG_KEY, useLDFlags } from '../hooks/useLDFlags'
 import { showToast } from '../lib/toast-bus'
 import { categoryMeta } from '../data/products'
 import { useStoreMetricTrack } from '../hooks/useStoreMetricTrack'
 import { STORE_METRIC_EVENTS } from '../analytics/storeMetricEvents'
+
+const COLORADO_STATE_FLAG_PRODUCT_ID = 'state-co'
+const POPULAR_HOME_SIZE = '3×5 ft'
 
 export default function ProductDetail() {
   const { id } = useParams<{ id: string }>()
@@ -20,7 +23,13 @@ export default function ProductDetail() {
   const trackMetric = useStoreMetricTrack()
   const { addToCart } = useCart()
   const { addToWishlist, removeFromWishlist, isWishlisted } = useWishlist()
-  const [selectedSize, setSelectedSize] = useState('')
+  const popularSizeTreatment = Boolean(flags[DESKTOP_DEFAULT_POPULAR_SIZE_FLAG_KEY])
+  const shouldPreselectPopularSize = Boolean(
+    popularSizeTreatment &&
+    product?.id === COLORADO_STATE_FLAG_PRODUCT_ID &&
+    product.sizes.includes(POPULAR_HOME_SIZE),
+  )
+  const [selectedSize, setSelectedSize] = useState(() => shouldPreselectPopularSize ? POPULAR_HOME_SIZE : '')
   const [selectedMaterial, setSelectedMaterial] = useState('')
   const [quantity, setQuantity] = useState(1)
   const [activeTab, setActiveTab] = useState<'description' | 'shipping' | 'reviews'>('description')
@@ -33,6 +42,10 @@ export default function ProductDetail() {
     })
   }, [product, trackMetric])
 
+  useEffect(() => {
+    setSelectedSize(shouldPreselectPopularSize ? POPULAR_HOME_SIZE : '')
+  }, [product?.id, shouldPreselectPopularSize])
+
   if (!product) {
     return (
       <div className="max-w-7xl mx-auto px-4 py-16 text-center">
@@ -42,11 +55,23 @@ export default function ProductDetail() {
     )
   }
 
-  // product is defined here — early return above handles undefined
-  const p = product!
+  const p = product
   const reviews = getReviewsForProduct(p.id)
   const related = products.filter(pr => pr.category === p.category && pr.id !== p.id).slice(0, 4)
   const wishlisted = isWishlisted(p.id)
+
+  function handleSizeSelect(size: string) {
+    setSelectedSize(size)
+    trackMetric(STORE_METRIC_EVENTS.pdpVariantOptionSelected, {
+      productId: p.id,
+      optionName: 'size',
+      optionValue: size,
+      source: shouldPreselectPopularSize && size === POPULAR_HOME_SIZE ? 'popular-size-option-click' : 'manual',
+      experimentFlagKey: DESKTOP_DEFAULT_POPULAR_SIZE_FLAG_KEY,
+      experimentVariation: popularSizeTreatment ? 'eh-arm-1' : 'eh-arm-0',
+      hadDefaultSelection: shouldPreselectPopularSize,
+    })
+  }
 
   function handleAddToCart() {
     const size = selectedSize || p.sizes[0]
@@ -58,6 +83,9 @@ export default function ProductDetail() {
       quantity,
       size,
       material,
+      experimentFlagKey: DESKTOP_DEFAULT_POPULAR_SIZE_FLAG_KEY,
+      experimentVariation: popularSizeTreatment ? 'eh-arm-1' : 'eh-arm-0',
+      sizeWasDefaultedByExperiment: shouldPreselectPopularSize && size === POPULAR_HOME_SIZE,
     })
     showToast(`${p.name} added to cart`)
   }
@@ -76,7 +104,6 @@ export default function ProductDetail() {
 
   return (
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-      {/* Breadcrumb */}
       <nav className="text-sm text-gray-500 mb-6 flex items-center gap-2 flex-wrap">
         <Link to="/" className="hover:text-gray-900">Home</Link>
         <span>›</span>
@@ -88,7 +115,6 @@ export default function ProductDetail() {
       </nav>
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-10 mb-12">
-        {/* Image */}
         <div>
           <FlagImage
             flagImagePath={p.flagImagePath}
@@ -98,7 +124,6 @@ export default function ProductDetail() {
           />
         </div>
 
-        {/* Details */}
         <div>
           <h1 className="text-2xl font-bold text-gray-900 mb-2">{p.name}</h1>
           <StarRating rating={p.rating} reviewCount={p.reviewCount} size="md" />
@@ -117,25 +142,31 @@ export default function ProductDetail() {
 
           <p className="mt-4 text-gray-600 leading-relaxed">{p.description}</p>
 
-          {/* Size selector */}
           {p.sizes.length > 1 && (
             <div className="mt-5">
               <label className="block text-sm font-medium text-gray-700 mb-2">Size</label>
               <div className="flex flex-wrap gap-2">
-                {p.sizes.map(s => (
-                  <button
-                    key={s}
-                    onClick={() => setSelectedSize(s)}
-                    className={`px-4 py-2 rounded-lg text-sm border ${selectedSize === s ? 'border-[#1B2A4A] bg-[#1B2A4A] text-white' : 'border-gray-200 text-gray-700 hover:border-gray-400'}`}
-                  >
-                    {s}
-                  </button>
-                ))}
+                {p.sizes.map(s => {
+                  const isPopularHomeSize = shouldPreselectPopularSize && s === POPULAR_HOME_SIZE
+                  return (
+                    <button
+                      key={s}
+                      onClick={() => handleSizeSelect(s)}
+                      className={`px-4 py-2 rounded-lg text-sm border ${selectedSize === s ? 'border-[#1B2A4A] bg-[#1B2A4A] text-white' : 'border-gray-200 text-gray-700 hover:border-gray-400'}`}
+                    >
+                      <span>{s}</span>
+                      {isPopularHomeSize && (
+                        <span className={`ml-2 text-xs font-semibold ${selectedSize === s ? 'text-yellow-200' : 'text-[#B22234]'}`}>
+                          Most popular for homes
+                        </span>
+                      )}
+                    </button>
+                  )
+                })}
               </div>
             </div>
           )}
 
-          {/* Material selector */}
           {p.material.length > 1 && (
             <div className="mt-5">
               <label className="block text-sm font-medium text-gray-700 mb-2">Material</label>
@@ -153,126 +184,92 @@ export default function ProductDetail() {
             </div>
           )}
 
-          {/* Quantity */}
           <div className="mt-5">
             <label className="block text-sm font-medium text-gray-700 mb-2">Quantity</label>
-            <div className="flex items-center border border-gray-200 rounded-lg w-fit">
-              <button onClick={() => setQuantity(q => Math.max(1, q - 1))} className="px-4 py-2 text-gray-700 hover:bg-gray-50 text-lg">−</button>
-              <span className="px-4 py-2 text-sm font-medium w-12 text-center">{quantity}</span>
-              <button onClick={() => setQuantity(q => q + 1)} className="px-4 py-2 text-gray-700 hover:bg-gray-50 text-lg">+</button>
+            <div className="flex items-center border border-gray-200 rounded-lg w-32">
+              <button onClick={() => setQuantity(q => Math.max(1, q - 1))} className="px-3 py-2 text-gray-700 hover:bg-gray-50">−</button>
+              <span className="flex-1 text-center text-sm">{quantity}</span>
+              <button onClick={() => setQuantity(q => q + 1)} className="px-3 py-2 text-gray-700 hover:bg-gray-50">+</button>
             </div>
           </div>
 
-          {/* CTAs */}
-          <div className="mt-6 flex gap-3 flex-wrap">
+          <div className="mt-6 flex gap-3">
             <button
               onClick={handleAddToCart}
               disabled={!p.inStock}
-              className="flex-1 bg-[#1B2A4A] text-white font-semibold py-3 px-6 rounded-lg hover:bg-[#B22234] transition-colors disabled:bg-gray-300 disabled:cursor-not-allowed"
+              className="flex-1 bg-[#1B2A4A] text-white font-semibold py-3 rounded-lg hover:bg-[#B22234] transition-colors disabled:bg-gray-300 disabled:cursor-not-allowed"
             >
               {p.inStock ? 'Add to Cart' : 'Out of Stock'}
             </button>
-            {flags['enable-wishlist'] && (
-              <button
-                onClick={handleWishlist}
-                className={`px-4 py-3 rounded-lg border font-medium text-sm transition-colors ${wishlisted ? 'border-red-300 bg-red-50 text-red-600' : 'border-gray-200 text-gray-700 hover:border-gray-400'}`}
-              >
-                {wishlisted ? '♥ Saved' : '♡ Wishlist'}
-              </button>
-            )}
+            <button
+              onClick={handleWishlist}
+              className={`px-5 rounded-lg border transition-colors ${wishlisted ? 'border-[#B22234] text-[#B22234] bg-red-50' : 'border-gray-200 text-gray-700 hover:bg-gray-50'}`}
+              aria-label={wishlisted ? 'Remove from wishlist' : 'Add to wishlist'}
+            >
+              ♥
+            </button>
           </div>
 
-          {!p.inStock && (
-            <p className="mt-3 text-sm text-red-600">This item is currently out of stock.</p>
-          )}
-
-          {/* Trust signals */}
-          <div className="mt-6 border-t border-gray-100 pt-5 space-y-2">
-            <div className="flex items-center gap-2 text-sm text-gray-500">
-              <span>🚚</span> Free shipping on orders over $75
-            </div>
-            <div className="flex items-center gap-2 text-sm text-gray-500">
-              <span>↩️</span> 30-day hassle-free returns
-            </div>
-            <div className="flex items-center gap-2 text-sm text-gray-500">
-              <span>✅</span> Satisfaction guaranteed
-            </div>
+          <div className="mt-5 grid grid-cols-3 gap-3 text-center text-xs text-gray-500">
+            <div className="bg-gray-50 rounded-lg p-3">🚚<br />Fast shipping</div>
+            <div className="bg-gray-50 rounded-lg p-3">↩️<br />30-day returns</div>
+            <div className="bg-gray-50 rounded-lg p-3">🔒<br />Secure checkout</div>
           </div>
         </div>
       </div>
 
-      {/* Tabs */}
-      <div className="border-b border-gray-200 mb-8">
-        <div className="flex gap-0">
+      <div className="border-t border-gray-100 mb-12">
+        <div className="flex gap-6 border-b border-gray-100">
           {tabs.map(tab => (
             <button
               key={tab}
-              onClick={() => setActiveTab(tab as 'description' | 'shipping' | 'reviews')}
-              className={`px-6 py-3 text-sm font-medium border-b-2 capitalize transition-colors ${
-                activeTab === tab
-                  ? 'border-[#B22234] text-[#B22234]'
-                  : 'border-transparent text-gray-500 hover:text-gray-700'
-              }`}
+              onClick={() => setActiveTab(tab as typeof activeTab)}
+              className={`py-3 text-sm font-medium capitalize ${activeTab === tab ? 'text-[#1B2A4A] border-b-2 border-[#1B2A4A]' : 'text-gray-500 hover:text-gray-900'}`}
             >
               {tab}
             </button>
           ))}
         </div>
-      </div>
 
-      <div className="mb-12">
-        {activeTab === 'description' && (
-          <div className="prose max-w-none text-gray-600">
-            <p className="text-base leading-relaxed">{p.description}</p>
-            <div className="mt-4 grid grid-cols-2 gap-4 text-sm">
-              <div>
-                <span className="font-medium text-gray-900">Available Sizes:</span>
-                <ul className="mt-1 space-y-1">
-                  {p.sizes.map(s => <li key={s} className="text-gray-600">• {s}</li>)}
-                </ul>
-              </div>
-              <div>
-                <span className="font-medium text-gray-900">Materials:</span>
-                <ul className="mt-1 space-y-1">
-                  {p.material.map(m => <li key={m} className="text-gray-600">• {m}</li>)}
-                </ul>
-              </div>
+        <div className="py-6">
+          {activeTab === 'description' && (
+            <div className="prose max-w-none text-gray-600">
+              <p>{p.description}</p>
+              <ul className="mt-4 list-disc pl-5 space-y-1">
+                <li>Durable fabric with vivid, fade-resistant colors</li>
+                <li>Canvas header with brass grommets for easy hanging</li>
+                <li>Suitable for indoor or outdoor display</li>
+              </ul>
             </div>
-          </div>
-        )}
-        {activeTab === 'shipping' && (
-          <div className="text-sm text-gray-600 space-y-3">
-            <p><strong className="text-gray-900">Standard Shipping (5–7 business days):</strong> Free on orders over $75, otherwise $8.99.</p>
-            <p><strong className="text-gray-900">Express Shipping (2–3 business days):</strong> $14.99</p>
-            <p><strong className="text-gray-900">Overnight Shipping:</strong> $29.99</p>
-            <p><strong className="text-gray-900">Returns:</strong> We accept returns within 30 days of delivery. Items must be unused and in original packaging.</p>
-          </div>
-        )}
-        {activeTab === 'reviews' && flags['show-reviews-tab'] && (
-          <div className="space-y-5">
-            {reviews.map(r => (
-              <div key={r.id} className="border border-gray-100 rounded-xl p-5">
-                <div className="flex items-start justify-between mb-2">
-                  <div>
-                    <span className="font-semibold text-gray-900 text-sm">{r.author}</span>
-                    <div className="mt-0.5"><StarRating rating={r.rating} /></div>
+          )}
+          {activeTab === 'shipping' && (
+            <div className="text-gray-600 space-y-2">
+              <p>Standard shipping arrives in 5–7 business days. Express and overnight options are available at checkout when enabled.</p>
+              <p>Orders over ${flags['free-shipping-threshold']} qualify for free standard shipping.</p>
+            </div>
+          )}
+          {activeTab === 'reviews' && (
+            <div className="space-y-4">
+              {reviews.map(review => (
+                <div key={review.id} className="border border-gray-100 rounded-xl p-4">
+                  <div className="flex items-center justify-between mb-1">
+                    <div className="font-medium text-gray-900">{review.title}</div>
+                    <StarRating rating={review.rating} />
                   </div>
-                  <span className="text-xs text-gray-400">{r.date}</span>
+                  <p className="text-sm text-gray-600 mb-2">{review.body}</p>
+                  <p className="text-xs text-gray-400">{review.author} · {new Date(review.date).toLocaleDateString()}</p>
                 </div>
-                <p className="font-medium text-sm text-gray-900 mb-1">{r.title}</p>
-                <p className="text-sm text-gray-600">{r.body}</p>
-              </div>
-            ))}
-          </div>
-        )}
+              ))}
+            </div>
+          )}
+        </div>
       </div>
 
-      {/* Related products */}
       {flags['show-product-recommendations'] && related.length > 0 && (
         <section>
-          <h2 className="text-xl font-bold text-gray-900 mb-5">You May Also Like</h2>
+          <h2 className="text-xl font-bold text-gray-900 mb-5">You may also like</h2>
           <div className="grid grid-cols-2 md:grid-cols-4 gap-5">
-            {related.map(p => <ProductCard key={p.id} product={p} />)}
+            {related.map(pr => <ProductCard key={pr.id} product={pr} />)}
           </div>
         </section>
       )}
