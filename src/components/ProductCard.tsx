@@ -5,20 +5,38 @@ import StarRating from './StarRating'
 import { useCart } from '../context/CartContext'
 import { useLDFlags } from '../hooks/useLDFlags'
 import { showToast } from '../lib/toast-bus'
+import { useStoreMetricTrack } from '../hooks/useStoreMetricTrack'
+import { STORE_METRIC_EVENTS } from '../analytics/storeMetricEvents'
 
 interface ProductCardProps {
   product: Product
+  addToCartVisibleOverride?: boolean
+  metricSource?: 'homepage_best_sellers'
 }
 
-export default function ProductCard({ product }: ProductCardProps) {
+export default function ProductCard({ product, addToCartVisibleOverride, metricSource }: ProductCardProps) {
   const { addToCart } = useCart()
   const flags = useLDFlags()
-  const addToCartVisible = flags['show-product-card-add-to-cart']
+  const trackMetric = useStoreMetricTrack()
+  const addToCartVisible = addToCartVisibleOverride ?? flags['show-product-card-add-to-cart']
   const isOnSale = !!product.originalPrice
 
   function handleAddToCart(e: React.MouseEvent) {
     e.preventDefault()
     addToCart(product, 1, product.sizes[0], product.material[0])
+
+    const metricData = {
+      productId: product.id,
+      category: product.category,
+      source: metricSource ?? 'product_card',
+      quantity: 1,
+    }
+
+    if (metricSource === 'homepage_best_sellers') {
+      trackMetric(STORE_METRIC_EVENTS.homepageAddToCart, metricData)
+    }
+    trackMetric(STORE_METRIC_EVENTS.addToCart, metricData)
+
     showToast(`${product.name} added to cart`)
   }
 
