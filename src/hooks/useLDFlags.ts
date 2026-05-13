@@ -24,6 +24,8 @@ export interface FlagSet extends StateShowFlags {
   'checkout-progress-indicator': boolean
   'free-shipping-threshold': number
   'homepage-hero-variant': string
+  /** Control: duplicate Golf text tile. Variant: replace that text tile with Country. */
+  'eh-desk-category-dedup-desktop': boolean
 }
 
 const defaults: Omit<FlagSet, keyof StateShowFlags> & StateShowFlags = {
@@ -39,6 +41,7 @@ const defaults: Omit<FlagSet, keyof StateShowFlags> & StateShowFlags = {
   'checkout-progress-indicator': true,
   'free-shipping-threshold': 75,
   'homepage-hero-variant': 'control',
+  'eh-desk-category-dedup-desktop': false,
 }
 
 function stateShowFromFlags(flags: ReturnType<typeof useFlags>): StateShowFlags {
@@ -70,5 +73,6 @@ export function useLDFlags(): FlagSet {
     'checkout-progress-indicator': flags['checkout-progress-indicator'] ?? defaults['checkout-progress-indicator'],
     'free-shipping-threshold': flags['free-shipping-threshold'] ?? defaults['free-shipping-threshold'],
     'homepage-hero-variant': flags['homepage-hero-variant'] ?? defaults['homepage-hero-variant'],
+    'eh-desk-category-dedup-desktop': flags['eh-desk-category-dedup-desktop'] ?? defaults['eh-desk-category-dedup-desktop'],
   }
 }
