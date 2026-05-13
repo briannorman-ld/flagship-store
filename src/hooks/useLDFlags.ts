@@ -24,6 +24,8 @@ export interface FlagSet extends StateShowFlags {
   'checkout-progress-indicator': boolean
   'free-shipping-threshold': number
   'homepage-hero-variant': string
+  /** Experiment: Browse All Categories hero CTA destination. false/control => /flags/nautical, true/treatment => /flags. */
+  'eh-desk-browse-all-link-desktop': boolean
 }
 
 const defaults: Omit<FlagSet, keyof StateShowFlags> & StateShowFlags = {
@@ -39,6 +41,7 @@ const defaults: Omit<FlagSet, keyof StateShowFlags> & StateShowFlags = {
   'checkout-progress-indicator': true,
   'free-shipping-threshold': 75,
   'homepage-hero-variant': 'control',
+  'eh-desk-browse-all-link-desktop': false,
 }
 
 function stateShowFromFlags(flags: ReturnType<typeof useFlags>): StateShowFlags {
@@ -70,5 +73,6 @@ export function useLDFlags(): FlagSet {
     'checkout-progress-indicator': flags['checkout-progress-indicator'] ?? defaults['checkout-progress-indicator'],
     'free-shipping-threshold': flags['free-shipping-threshold'] ?? defaults['free-shipping-threshold'],
     'homepage-hero-variant': flags['homepage-hero-variant'] ?? defaults['homepage-hero-variant'],
+    'eh-desk-browse-all-link-desktop': flags['eh-desk-browse-all-link-desktop'] ?? defaults['eh-desk-browse-all-link-desktop'],
   }
 }
