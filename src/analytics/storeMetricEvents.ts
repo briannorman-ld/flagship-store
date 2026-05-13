@@ -6,6 +6,7 @@ export const STORE_METRIC_EVENTS = {
   pdpView: 'flagship-store-pdp-view',
   plpView: 'flagship-store-plp-view',
   addToCart: 'flagship-store-add-to-cart',
+  homepageAddToCart: 'add_to_cart_homepage',
   cartView: 'flagship-store-cart-view',
   checkoutStart: 'flagship-store-checkout-start',
   orderConfirmation: 'flagship-store-order-confirmation',

@@ -2,6 +2,8 @@ import { useFlags } from 'launchdarkly-react-client-sdk'
 
 import { STATE_CATALOG_PRODUCT_IDS, type StateCatalogProductId } from '../data/usStateCatalog'
 
+export const DESKTOP_BESTSELLER_ATC_FLAG_KEY = 'eh-desk-bestseller-atc-visible-desktop'
+
 /** LD keys for state SKUs: `show-state-{postal}` (e.g. `show-state-ca`). */
 type StateShowFlagKey = `show-${StateCatalogProductId}`
 
@@ -21,6 +23,8 @@ export interface FlagSet extends StateShowFlags {
   'show-sale-badge': boolean
   /** When true, product card "Add to Cart" is visible without hovering the card. */
   'show-product-card-add-to-cart': boolean
+  /** Experiment: desktop homepage Best Seller cards only. */
+  [DESKTOP_BESTSELLER_ATC_FLAG_KEY]: boolean
   'checkout-progress-indicator': boolean
   'free-shipping-threshold': number
   'homepage-hero-variant': string
@@ -36,6 +40,7 @@ const defaults: Omit<FlagSet, keyof StateShowFlags> & StateShowFlags = {
   'enable-wishlist': true,
   'show-sale-badge': true,
   'show-product-card-add-to-cart': false,
+  [DESKTOP_BESTSELLER_ATC_FLAG_KEY]: false,
   'checkout-progress-indicator': true,
   'free-shipping-threshold': 75,
   'homepage-hero-variant': 'control',
@@ -55,6 +60,11 @@ export function useLDFlags(): FlagSet {
   /** E2E / CI only (`vite build --mode e2e` loads `.env.e2e`) — avoids needing a real LD client for Playwright. */
   const playwrightAtcTreatment = import.meta.env.VITE_PLAYWRIGHT_ATC_TREATMENT === 'true'
 
+  const desktopBestsellerAtcFlagValue = flags[DESKTOP_BESTSELLER_ATC_FLAG_KEY]
+  const desktopBestsellerAtcVisible = playwrightAtcTreatment
+    ? true
+    : (desktopBestsellerAtcFlagValue ?? defaults[DESKTOP_BESTSELLER_ATC_FLAG_KEY])
+
   return {
     ...stateShowFromFlags(flags),
     'show-promo-banner': flags['show-promo-banner'] ?? defaults['show-promo-banner'],
@@ -67,6 +77,7 @@ export function useLDFlags(): FlagSet {
     'show-product-card-add-to-cart': playwrightAtcTreatment
       ? true
       : (flags['show-product-card-add-to-cart'] ?? defaults['show-product-card-add-to-cart']),
+    [DESKTOP_BESTSELLER_ATC_FLAG_KEY]: desktopBestsellerAtcVisible,
     'checkout-progress-indicator': flags['checkout-progress-indicator'] ?? defaults['checkout-progress-indicator'],
     'free-shipping-threshold': flags['free-shipping-threshold'] ?? defaults['free-shipping-threshold'],
     'homepage-hero-variant': flags['homepage-hero-variant'] ?? defaults['homepage-hero-variant'],
