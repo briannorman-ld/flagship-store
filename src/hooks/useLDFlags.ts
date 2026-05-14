@@ -11,6 +11,8 @@ const stateShowDefaults: StateShowFlags = Object.fromEntries(
   STATE_CATALOG_PRODUCT_IDS.map((id) => [`show-${id}`, true]),
 ) as StateShowFlags
 
+export const DESKTOP_ALWAYS_VISIBLE_ATC_FLAG_KEY = 'eh-desk-always-visible-atc-desktop'
+
 export interface FlagSet extends StateShowFlags {
   'show-promo-banner': boolean
   'enable-express-checkout': boolean
@@ -19,8 +21,10 @@ export interface FlagSet extends StateShowFlags {
   'show-reviews-tab': boolean
   'enable-wishlist': boolean
   'show-sale-badge': boolean
-  /** When true, product card "Add to Cart" is visible without hovering the card. */
+  /** Legacy/product-wide control: when true, product card "Add to Cart" is visible without hovering the card. */
   'show-product-card-add-to-cart': boolean
+  /** Experiment Hunter desktop homepage ATC visibility test. Control=false, Variant B=true. */
+  [DESKTOP_ALWAYS_VISIBLE_ATC_FLAG_KEY]: boolean
   'checkout-progress-indicator': boolean
   'free-shipping-threshold': number
   'homepage-hero-variant': string
@@ -36,6 +40,7 @@ const defaults: Omit<FlagSet, keyof StateShowFlags> & StateShowFlags = {
   'enable-wishlist': true,
   'show-sale-badge': true,
   'show-product-card-add-to-cart': false,
+  [DESKTOP_ALWAYS_VISIBLE_ATC_FLAG_KEY]: false,
   'checkout-progress-indicator': true,
   'free-shipping-threshold': 75,
   'homepage-hero-variant': 'control',
@@ -54,6 +59,10 @@ export function useLDFlags(): FlagSet {
   const flags = useFlags()
   /** E2E / CI only (`vite build --mode e2e` loads `.env.e2e`) — avoids needing a real LD client for Playwright. */
   const playwrightAtcTreatment = import.meta.env.VITE_PLAYWRIGHT_ATC_TREATMENT === 'true'
+  const desktopAlwaysVisibleAtc = playwrightAtcTreatment
+    ? true
+    : ((flags[DESKTOP_ALWAYS_VISIBLE_ATC_FLAG_KEY] as boolean | undefined) ??
+      defaults[DESKTOP_ALWAYS_VISIBLE_ATC_FLAG_KEY])
 
   return {
     ...stateShowFromFlags(flags),
@@ -67,6 +76,7 @@ export function useLDFlags(): FlagSet {
     'show-product-card-add-to-cart': playwrightAtcTreatment
       ? true
       : (flags['show-product-card-add-to-cart'] ?? defaults['show-product-card-add-to-cart']),
+    [DESKTOP_ALWAYS_VISIBLE_ATC_FLAG_KEY]: desktopAlwaysVisibleAtc,
     'checkout-progress-indicator': flags['checkout-progress-indicator'] ?? defaults['checkout-progress-indicator'],
     'free-shipping-threshold': flags['free-shipping-threshold'] ?? defaults['free-shipping-threshold'],
     'homepage-hero-variant': flags['homepage-hero-variant'] ?? defaults['homepage-hero-variant'],

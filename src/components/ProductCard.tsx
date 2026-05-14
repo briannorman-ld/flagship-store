@@ -3,8 +3,10 @@ import type { Product } from '../types'
 import FlagImage from './FlagImage'
 import StarRating from './StarRating'
 import { useCart } from '../context/CartContext'
-import { useLDFlags } from '../hooks/useLDFlags'
+import { DESKTOP_ALWAYS_VISIBLE_ATC_FLAG_KEY, useLDFlags } from '../hooks/useLDFlags'
 import { showToast } from '../lib/toast-bus'
+import { useStoreMetricTrack } from '../hooks/useStoreMetricTrack'
+import { STORE_METRIC_EVENTS } from '../analytics/storeMetricEvents'
 
 interface ProductCardProps {
   product: Product
@@ -13,12 +15,26 @@ interface ProductCardProps {
 export default function ProductCard({ product }: ProductCardProps) {
   const { addToCart } = useCart()
   const flags = useLDFlags()
+  const trackMetric = useStoreMetricTrack()
   const addToCartVisible = flags['show-product-card-add-to-cart']
+  const desktopExperimentAddToCartVisible = flags[DESKTOP_ALWAYS_VISIBLE_ATC_FLAG_KEY]
   const isOnSale = !!product.originalPrice
 
   function handleAddToCart(e: React.MouseEvent) {
     e.preventDefault()
-    addToCart(product, 1, product.sizes[0], product.material[0])
+    const size = product.sizes[0]
+    const material = product.material[0]
+    addToCart(product, 1, size, material)
+    trackMetric(STORE_METRIC_EVENTS.addToCart, {
+      productId: product.id,
+      category: product.category,
+      quantity: 1,
+      size,
+      material,
+      source: 'product-card',
+      experimentKey: DESKTOP_ALWAYS_VISIBLE_ATC_FLAG_KEY,
+      experimentVariant: desktopExperimentAddToCartVisible ? 'eh-arm-1' : 'eh-arm-0',
+    })
     showToast(`${product.name} added to cart`)
   }
 
@@ -58,7 +74,7 @@ export default function ProductCard({ product }: ProductCardProps) {
             disabled={!product.inStock}
             className={`w-full rounded-lg bg-[#1B2A4A] py-2 text-sm font-medium text-white transition-opacity duration-150 hover:bg-[#B22234] disabled:cursor-not-allowed disabled:bg-gray-300 ${
               addToCartVisible ? 'opacity-100' : 'opacity-0 group-hover:opacity-100'
-            }`}
+            } ${desktopExperimentAddToCartVisible ? 'lg:opacity-100' : ''}`}
           >
             Add to Cart
           </button>
