@@ -8,9 +8,11 @@ import { showToast } from '../lib/toast-bus'
 
 interface ProductCardProps {
   product: Product
+  onProductClick?: (product: Product) => void
+  onAddToCart?: (product: Product) => void
 }
 
-export default function ProductCard({ product }: ProductCardProps) {
+export default function ProductCard({ product, onProductClick, onAddToCart }: ProductCardProps) {
   const { addToCart } = useCart()
   const flags = useLDFlags()
   const addToCartVisible = flags['show-product-card-add-to-cart']
@@ -19,11 +21,12 @@ export default function ProductCard({ product }: ProductCardProps) {
   function handleAddToCart(e: React.MouseEvent) {
     e.preventDefault()
     addToCart(product, 1, product.sizes[0], product.material[0])
+    onAddToCart?.(product)
     showToast(`${product.name} added to cart`)
   }
 
   return (
-    <Link to={`/product/${product.id}`} className="group flex h-full min-h-0 flex-col">
+    <Link to={`/product/${product.id}`} onClick={() => onProductClick?.(product)} className="group flex h-full min-h-0 flex-col">
       <div className="relative flex h-full min-h-0 flex-col overflow-hidden rounded-xl border border-gray-100 bg-white shadow-sm transition-shadow duration-200 hover:shadow-md">
         {isOnSale && flags['show-sale-badge'] && (
           <div className="absolute top-3 left-3 z-10 bg-red-600 text-white text-xs font-semibold px-2 py-0.5 rounded-full">
