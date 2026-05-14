@@ -24,6 +24,8 @@ export interface FlagSet extends StateShowFlags {
   'checkout-progress-indicator': boolean
   'free-shipping-threshold': number
   'homepage-hero-variant': string
+  /** Experiment Hunter: inline trust strip in Best Sellers on desktop. */
+  'eh-best-sellers-inline-trust-desktop': string
 }
 
 const defaults: Omit<FlagSet, keyof StateShowFlags> & StateShowFlags = {
@@ -39,6 +41,7 @@ const defaults: Omit<FlagSet, keyof StateShowFlags> & StateShowFlags = {
   'checkout-progress-indicator': true,
   'free-shipping-threshold': 75,
   'homepage-hero-variant': 'control',
+  'eh-best-sellers-inline-trust-desktop': 'eh-arm-0',
 }
 
 function stateShowFromFlags(flags: ReturnType<typeof useFlags>): StateShowFlags {
@@ -70,5 +73,8 @@ export function useLDFlags(): FlagSet {
     'checkout-progress-indicator': flags['checkout-progress-indicator'] ?? defaults['checkout-progress-indicator'],
     'free-shipping-threshold': flags['free-shipping-threshold'] ?? defaults['free-shipping-threshold'],
     'homepage-hero-variant': flags['homepage-hero-variant'] ?? defaults['homepage-hero-variant'],
+    'eh-best-sellers-inline-trust-desktop':
+      (flags['eh-best-sellers-inline-trust-desktop'] as string | undefined) ??
+      defaults['eh-best-sellers-inline-trust-desktop'],
   }
 }
