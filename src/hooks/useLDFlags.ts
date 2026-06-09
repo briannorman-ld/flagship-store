@@ -11,6 +11,8 @@ const stateShowDefaults: StateShowFlags = Object.fromEntries(
   STATE_CATALOG_PRODUCT_IDS.map((id) => [`show-${id}`, true]),
 ) as StateShowFlags
 
+export const HOMEPAGE_DESKTOP_ATC_FLAG_KEY = 'eh-desk-add-to-cart-always-visible-desktop'
+
 export interface FlagSet extends StateShowFlags {
   'show-promo-banner': boolean
   'enable-express-checkout': boolean
@@ -19,8 +21,10 @@ export interface FlagSet extends StateShowFlags {
   'show-reviews-tab': boolean
   'enable-wishlist': boolean
   'show-sale-badge': boolean
-  /** When true, product card "Add to Cart" is visible without hovering the card. */
+  /** Legacy/global product-card ATC visibility flag. */
   'show-product-card-add-to-cart': boolean
+  /** Experiment Hunter: homepage desktop Best Sellers card ATC visibility. */
+  'eh-desk-add-to-cart-always-visible-desktop': boolean
   'checkout-progress-indicator': boolean
   'free-shipping-threshold': number
   'homepage-hero-variant': string
@@ -36,6 +40,7 @@ const defaults: Omit<FlagSet, keyof StateShowFlags> & StateShowFlags = {
   'enable-wishlist': true,
   'show-sale-badge': true,
   'show-product-card-add-to-cart': false,
+  'eh-desk-add-to-cart-always-visible-desktop': false,
   'checkout-progress-indicator': true,
   'free-shipping-threshold': 75,
   'homepage-hero-variant': 'control',
@@ -67,6 +72,9 @@ export function useLDFlags(): FlagSet {
     'show-product-card-add-to-cart': playwrightAtcTreatment
       ? true
       : (flags['show-product-card-add-to-cart'] ?? defaults['show-product-card-add-to-cart']),
+    'eh-desk-add-to-cart-always-visible-desktop': playwrightAtcTreatment
+      ? true
+      : (flags[HOMEPAGE_DESKTOP_ATC_FLAG_KEY] ?? defaults['eh-desk-add-to-cart-always-visible-desktop']),
     'checkout-progress-indicator': flags['checkout-progress-indicator'] ?? defaults['checkout-progress-indicator'],
     'free-shipping-threshold': flags['free-shipping-threshold'] ?? defaults['free-shipping-threshold'],
     'homepage-hero-variant': flags['homepage-hero-variant'] ?? defaults['homepage-hero-variant'],
