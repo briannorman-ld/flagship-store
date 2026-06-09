@@ -4,26 +4,54 @@ import FlagImage from './FlagImage'
 import StarRating from './StarRating'
 import { useCart } from '../context/CartContext'
 import { useLDFlags } from '../hooks/useLDFlags'
+import { useStoreMetricTrack } from '../hooks/useStoreMetricTrack'
+import { STORE_METRIC_EVENTS } from '../analytics/storeMetricEvents'
 import { showToast } from '../lib/toast-bus'
 
 interface ProductCardProps {
   product: Product
+  trackingContext?: 'homepage-best-sellers' | 'homepage-new-arrivals' | 'plp' | 'search' | 'related-products'
+  forceAddToCartVisible?: boolean
 }
 
-export default function ProductCard({ product }: ProductCardProps) {
+export default function ProductCard({ product, trackingContext, forceAddToCartVisible = false }: ProductCardProps) {
   const { addToCart } = useCart()
   const flags = useLDFlags()
-  const addToCartVisible = flags['show-product-card-add-to-cart']
+  const trackMetric = useStoreMetricTrack()
+  const addToCartVisible = forceAddToCartVisible || flags['show-product-card-add-to-cart']
   const isOnSale = !!product.originalPrice
 
   function handleAddToCart(e: React.MouseEvent) {
     e.preventDefault()
+    e.stopPropagation()
     addToCart(product, 1, product.sizes[0], product.material[0])
+
+    const metricData = {
+      productId: product.id,
+      category: product.category,
+      source: trackingContext,
+    }
+
+    trackMetric(STORE_METRIC_EVENTS.addToCart, metricData)
+    if (trackingContext === 'homepage-best-sellers') {
+      trackMetric(STORE_METRIC_EVENTS.homepageAddToCart, metricData)
+    }
+
     showToast(`${product.name} added to cart`)
   }
 
+  function handleCardClick() {
+    if (trackingContext === 'homepage-best-sellers') {
+      trackMetric(STORE_METRIC_EVENTS.homepageBestSellerProductClick, {
+        productId: product.id,
+        category: product.category,
+        source: trackingContext,
+      })
+    }
+  }
+
   return (
-    <Link to={`/product/${product.id}`} className="group flex h-full min-h-0 flex-col">
+    <Link to={`/product/${product.id}`} onClick={handleCardClick} className="group flex h-full min-h-0 flex-col">
       <div className="relative flex h-full min-h-0 flex-col overflow-hidden rounded-xl border border-gray-100 bg-white shadow-sm transition-shadow duration-200 hover:shadow-md">
         {isOnSale && flags['show-sale-badge'] && (
           <div className="absolute top-3 left-3 z-10 bg-red-600 text-white text-xs font-semibold px-2 py-0.5 rounded-full">
