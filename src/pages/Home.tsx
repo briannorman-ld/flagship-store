@@ -47,9 +47,50 @@ const newArrivals = products.slice(-4)
 /** Self-hosted in /public; works with Vite `base` on GitHub Pages */
 const heroImageSrc = `${import.meta.env.BASE_URL}hero-american-flag-mountains.jpg`
 
+function BenefitRow() {
+  const benefits = [
+    { icon: '🇺🇸', title: 'Made in USA Options', copy: 'Domestic craftsmanship on select American flags.' },
+    { icon: '🚚', title: 'Fast Shipping', copy: 'Most in-stock flags ship quickly from our warehouse.' },
+    { icon: '✅', title: 'Satisfaction Guaranteed', copy: 'Quality materials, clear returns, and helpful support.' },
+    { icon: '📦', title: 'Bulk Discounts', copy: 'Save on event, school, business, and municipal orders.' },
+  ]
+
+  return (
+    <section className="bg-gray-50 border-y border-gray-100">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
+          {benefits.map(benefit => (
+            <div key={benefit.title} className="bg-white rounded-xl border border-gray-100 shadow-sm p-5">
+              <div className="text-2xl mb-2">{benefit.icon}</div>
+              <h3 className="font-semibold text-gray-900 mb-1">{benefit.title}</h3>
+              <p className="text-sm text-gray-500 leading-relaxed">{benefit.copy}</p>
+            </div>
+          ))}
+        </div>
+      </div>
+    </section>
+  )
+}
+
+function CompactTrustStrip() {
+  const items = ['Made in USA options', 'Fast shipping', 'Satisfaction guarantee', 'Bulk discounts']
+
+  return (
+    <div className="hidden lg:flex flex-wrap items-center gap-x-4 gap-y-2 rounded-xl border border-blue-100 bg-blue-50 px-4 py-3 text-sm text-[#1B2A4A]">
+      {items.map(item => (
+        <span key={item} className="inline-flex items-center gap-1.5 font-medium whitespace-nowrap">
+          <span className="text-green-600" aria-hidden>✓</span>
+          {item}
+        </span>
+      ))}
+    </div>
+  )
+}
+
 export default function Home() {
   const flags = useLDFlags()
   const heroVariant = flags['homepage-hero-variant']
+  const showTrustNearBestSellers = flags['eh-desktop-trust-near-products-desktop']
 
   return (
     <div>
@@ -126,85 +167,47 @@ export default function Home() {
             <Link
               key={slug}
               to={`/flags/${slug}`}
-              className={`bg-gradient-to-br ${bg} text-white rounded-xl py-2.5 px-3 flex flex-row items-center justify-center gap-2.5 hover:scale-[1.02] transition-transform shadow-md aspect-[3/1]`}
+              className={`bg-gradient-to-br ${bg} text-white rounded-xl py-2.5 px-3 flex flex-col items-center justify-center text-center min-h-24 shadow-sm hover:shadow-md transition-shadow`}
             >
-              <span className="text-2xl shrink-0">{emoji}</span>
-              <span className="font-semibold text-center text-xs sm:text-sm leading-tight">{categoryMeta[slug].label}</span>
-            </Link>
-          ))}
-        </div>
-        <div className="mt-4 grid grid-cols-2 md:grid-cols-4 gap-4">
-          {Object.entries(categoryMeta).slice(4).map(([slug, meta]) => (
-            <Link
-              key={slug}
-              to={`/flags/${slug}`}
-              className="border border-gray-200 text-gray-700 rounded-xl p-4 flex items-center gap-3 hover:border-[#1B2A4A] hover:bg-gray-50 transition-colors"
-            >
-              <span className="font-medium text-sm">{meta.label} →</span>
+              <span className="text-3xl mb-1">{emoji}</span>
+              <span className="font-semibold text-sm sm:text-base">{categoryMeta[slug].label}</span>
             </Link>
           ))}
         </div>
       </section>
 
       {/* Best Sellers */}
-      <section className="bg-gray-50 py-14">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex items-center justify-between mb-6">
-            <h2 className="text-2xl font-bold text-gray-900">Best Sellers</h2>
-            <Link to="/" className="text-sm text-[#B22234] font-medium hover:underline">Shop all →</Link>
+      <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pb-14" aria-labelledby="best-sellers-heading">
+        <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4 mb-6">
+          <div>
+            <h2 id="best-sellers-heading" className="text-2xl font-bold text-gray-900">Best Sellers</h2>
+            <p className="text-sm text-gray-500 mt-1">Customer favorites across our most popular flag categories.</p>
           </div>
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-5">
-            {bestSellerProducts.map(p => <ProductCard key={p.id} product={p} />)}
-          </div>
+          {showTrustNearBestSellers && <CompactTrustStrip />}
+        </div>
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-5">
+          {bestSellerProducts.map(product => <ProductCard key={product.id} product={product} />)}
         </div>
       </section>
 
-      {/* Trust bar */}
-      <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-14">
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-6 text-center">
-          {[
-            { icon: '🇺🇸', title: 'Made in USA Options', desc: 'Proudly American-made flags available' },
-            { icon: '🚚', title: 'Fast Shipping', desc: 'Most orders ship within 1 business day' },
-            { icon: '✅', title: 'Satisfaction Guaranteed', desc: '30-day returns on all items' },
-            { icon: '📦', title: 'Bulk Discounts', desc: 'Save more when you order in quantity' },
-          ].map(item => (
-            <div key={item.title} className="flex flex-col items-center gap-2 p-4">
-              <span className="text-3xl">{item.icon}</span>
-              <h3 className="font-semibold text-gray-900 text-sm">{item.title}</h3>
-              <p className="text-xs text-gray-500">{item.desc}</p>
-            </div>
-          ))}
-        </div>
-      </section>
+      {/* Control keeps the full benefit row between Best Sellers and New Arrivals; variant keeps it lower. */}
+      {!showTrustNearBestSellers && <BenefitRow />}
 
       {/* New Arrivals */}
-      <section className="bg-gray-50 py-14">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex items-center justify-between mb-6">
+      <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-14">
+        <div className="flex items-end justify-between mb-6">
+          <div>
             <h2 className="text-2xl font-bold text-gray-900">New Arrivals</h2>
-            <Link to="/flags/garden" className="text-sm text-[#B22234] font-medium hover:underline">View all →</Link>
+            <p className="text-sm text-gray-500 mt-1">Fresh additions to the FlagShip catalog.</p>
           </div>
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-5">
-            {newArrivals.map(p => <ProductCard key={p.id} product={p} />)}
-          </div>
+          <Link to="/search?q=flag" className="text-sm font-medium text-[#B22234] hover:underline">View all</Link>
+        </div>
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-5">
+          {newArrivals.map(product => <ProductCard key={product.id} product={product} />)}
         </div>
       </section>
 
-      {/* Email signup */}
-      <section className="bg-[#1B2A4A] text-white py-14 px-4 text-center">
-        <h2 className="text-2xl font-bold mb-2">Stay in the Loop</h2>
-        <p className="text-gray-300 mb-6">Get new products and exclusive deals delivered to your inbox.</p>
-        <form className="flex flex-col sm:flex-row gap-3 max-w-md mx-auto" onSubmit={e => e.preventDefault()}>
-          <input
-            type="email"
-            placeholder="Enter your email"
-            className="flex-1 px-4 py-3 rounded-lg text-gray-900 outline-none"
-          />
-          <button type="submit" className="bg-[#B22234] text-white font-semibold px-6 py-3 rounded-lg hover:bg-red-700 transition-colors whitespace-nowrap">
-            Subscribe
-          </button>
-        </form>
-      </section>
+      {showTrustNearBestSellers && <BenefitRow />}
     </div>
   )
 }
