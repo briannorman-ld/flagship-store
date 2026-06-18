@@ -126,84 +126,58 @@ export default function Home() {
             <Link
               key={slug}
               to={`/flags/${slug}`}
-              className={`bg-gradient-to-br ${bg} text-white rounded-xl py-2.5 px-3 flex flex-row items-center justify-center gap-2.5 hover:scale-[1.02] transition-transform shadow-md aspect-[3/1]`}
+              className={`bg-gradient-to-br ${bg} text-white rounded-xl py-2.5 px-3 flex flex-col justify-between min-h-[7rem] hover:scale-[1.02] transition-transform shadow-sm`}
             >
-              <span className="text-2xl shrink-0">{emoji}</span>
-              <span className="font-semibold text-center text-xs sm:text-sm leading-tight">{categoryMeta[slug].label}</span>
-            </Link>
-          ))}
-        </div>
-        <div className="mt-4 grid grid-cols-2 md:grid-cols-4 gap-4">
-          {Object.entries(categoryMeta).slice(4).map(([slug, meta]) => (
-            <Link
-              key={slug}
-              to={`/flags/${slug}`}
-              className="border border-gray-200 text-gray-700 rounded-xl p-4 flex items-center gap-3 hover:border-[#1B2A4A] hover:bg-gray-50 transition-colors"
-            >
-              <span className="font-medium text-sm">{meta.label} →</span>
+              <span className="text-3xl">{emoji}</span>
+              <div>
+                <h3 className="font-bold text-lg">{categoryMeta[slug]?.label}</h3>
+                <p className="text-sm text-white/80 line-clamp-2">{categoryMeta[slug]?.description}</p>
+              </div>
             </Link>
           ))}
         </div>
       </section>
 
       {/* Best Sellers */}
-      <section className="bg-gray-50 py-14">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex items-center justify-between mb-6">
-            <h2 className="text-2xl font-bold text-gray-900">Best Sellers</h2>
-            <Link to="/" className="text-sm text-[#B22234] font-medium hover:underline">Shop all →</Link>
+      <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pb-14">
+        <div className="flex items-center justify-between mb-6">
+          <h2 className="text-2xl font-bold text-gray-900">Best Sellers</h2>
+          <Link to="/flags/american" className="text-sm font-medium text-[#B22234] hover:underline">
+            View all →
+          </Link>
+        </div>
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-5">
+          {bestSellerProducts.map(p => <ProductCard key={p.id} product={p} placement="homepage" />)}
+        </div>
+      </section>
+
+      {/* Value props */}
+      <section className="bg-gray-50 py-12">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 grid grid-cols-1 md:grid-cols-3 gap-8 text-center">
+          <div>
+            <div className="text-4xl mb-3">🚚</div>
+            <h3 className="font-semibold text-gray-900 mb-1">Fast Shipping</h3>
+            <p className="text-sm text-gray-500">Most orders ship within 24 hours.</p>
           </div>
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-5">
-            {bestSellerProducts.map(p => <ProductCard key={p.id} product={p} />)}
+          <div>
+            <div className="text-4xl mb-3">⭐</div>
+            <h3 className="font-semibold text-gray-900 mb-1">Premium Quality</h3>
+            <p className="text-sm text-gray-500">Durable materials and vibrant colors.</p>
+          </div>
+          <div>
+            <div className="text-4xl mb-3">↩️</div>
+            <h3 className="font-semibold text-gray-900 mb-1">Easy Returns</h3>
+            <p className="text-sm text-gray-500">30-day satisfaction guarantee.</p>
           </div>
         </div>
       </section>
 
-      {/* Trust bar */}
+      {/* New arrivals */}
       <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-14">
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-6 text-center">
-          {[
-            { icon: '🇺🇸', title: 'Made in USA Options', desc: 'Proudly American-made flags available' },
-            { icon: '🚚', title: 'Fast Shipping', desc: 'Most orders ship within 1 business day' },
-            { icon: '✅', title: 'Satisfaction Guaranteed', desc: '30-day returns on all items' },
-            { icon: '📦', title: 'Bulk Discounts', desc: 'Save more when you order in quantity' },
-          ].map(item => (
-            <div key={item.title} className="flex flex-col items-center gap-2 p-4">
-              <span className="text-3xl">{item.icon}</span>
-              <h3 className="font-semibold text-gray-900 text-sm">{item.title}</h3>
-              <p className="text-xs text-gray-500">{item.desc}</p>
-            </div>
-          ))}
+        <h2 className="text-2xl font-bold text-gray-900 mb-6">New Arrivals</h2>
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-5">
+          {newArrivals.map(p => <ProductCard key={p.id} product={p} placement="homepage" />)}
         </div>
-      </section>
-
-      {/* New Arrivals */}
-      <section className="bg-gray-50 py-14">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex items-center justify-between mb-6">
-            <h2 className="text-2xl font-bold text-gray-900">New Arrivals</h2>
-            <Link to="/flags/garden" className="text-sm text-[#B22234] font-medium hover:underline">View all →</Link>
-          </div>
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-5">
-            {newArrivals.map(p => <ProductCard key={p.id} product={p} />)}
-          </div>
-        </div>
-      </section>
-
-      {/* Email signup */}
-      <section className="bg-[#1B2A4A] text-white py-14 px-4 text-center">
-        <h2 className="text-2xl font-bold mb-2">Stay in the Loop</h2>
-        <p className="text-gray-300 mb-6">Get new products and exclusive deals delivered to your inbox.</p>
-        <form className="flex flex-col sm:flex-row gap-3 max-w-md mx-auto" onSubmit={e => e.preventDefault()}>
-          <input
-            type="email"
-            placeholder="Enter your email"
-            className="flex-1 px-4 py-3 rounded-lg text-gray-900 outline-none"
-          />
-          <button type="submit" className="bg-[#B22234] text-white font-semibold px-6 py-3 rounded-lg hover:bg-red-700 transition-colors whitespace-nowrap">
-            Subscribe
-          </button>
-        </form>
       </section>
     </div>
   )
