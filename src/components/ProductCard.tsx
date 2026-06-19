@@ -1,4 +1,4 @@
-import { Link } from 'react-router-dom'
+import { Link, useLocation } from 'react-router-dom'
 import type { Product } from '../types'
 import FlagImage from './FlagImage'
 import StarRating from './StarRating'
@@ -13,7 +13,11 @@ interface ProductCardProps {
 export default function ProductCard({ product }: ProductCardProps) {
   const { addToCart } = useCart()
   const flags = useLDFlags()
-  const addToCartVisible = flags['show-product-card-add-to-cart']
+  const location = useLocation()
+  const isHomepage = location.pathname === '/'
+  const addToCartVisible =
+    flags['show-product-card-add-to-cart'] ||
+    (isHomepage && flags['eh-desktop-visible-card-cta-desktop'])
   const isOnSale = !!product.originalPrice
 
   function handleAddToCart(e: React.MouseEvent) {
