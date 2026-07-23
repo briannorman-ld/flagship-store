@@ -55,7 +55,7 @@ export default function ProductCard({ product }: ProductCardProps) {
           <button
             onClick={handleAddToCart}
             disabled={!product.inStock}
-            className="w-full rounded-lg bg-[#1B2A4A] py-2 text-sm font-medium text-white transition-opacity duration-150 hover:bg-[#B22234] disabled:cursor-not-allowed disabled:bg-gray-300"
+            className="w-full rounded-lg bg-[#1B2A4A] py-2 text-sm font-medium text-white opacity-0 transition-opacity duration-150 group-hover:opacity-100 hover:bg-[#B22234] disabled:cursor-not-allowed disabled:bg-gray-300"
           >
             Add to Cart
           </button>
