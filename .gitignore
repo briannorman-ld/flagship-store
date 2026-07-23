@@ -12,6 +12,10 @@ dist
 dist-ssr
 *.local
 
+# Local env overrides (contains VITE_LD_CLIENT_ID, API tokens, etc.)
+.env.local
+.env.*.local
+
 playwright-report
 test-results
 
