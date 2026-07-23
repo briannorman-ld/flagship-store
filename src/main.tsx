@@ -40,6 +40,11 @@ async function bootstrap() {
         clientSideID,
         context: { kind: 'user', ...ldUser },
         options: { streaming: true },
+        // The codebase reads flags by their original kebab-case keys
+        // (e.g. flags['show-card-add-to-cart']). Disable the SDK's default
+        // camelCase conversion so those lookups receive live values instead
+        // of silently falling back to in-code defaults.
+        reactOptions: { useCamelCaseFlagKeys: false },
       })
     } catch {
       LDProvider = ({ children }) => <>{children}</>
