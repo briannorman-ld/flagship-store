@@ -1,6 +1,6 @@
 /**
  * Custom event keys for LaunchDarkly metrics (project: flagship-store).
- * Keep in sync with `scripts/create-flagship-store-metrics.mjs`.
+ * Keep in sync with `scripts/create-flagship-store-metrics.mjs` where applicable.
  */
 export const STORE_METRIC_EVENTS = {
   pdpView: 'flagship-store-pdp-view',
@@ -9,4 +9,5 @@ export const STORE_METRIC_EVENTS = {
   cartView: 'flagship-store-cart-view',
   checkoutStart: 'flagship-store-checkout-start',
   orderConfirmation: 'flagship-store-order-confirmation',
+  heroCtaClick: 'hero_cta_click',
 } as const
