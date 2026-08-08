@@ -13,6 +13,10 @@ import { categoryMeta } from '../data/products'
 import { useStoreMetricTrack } from '../hooks/useStoreMetricTrack'
 import { STORE_METRIC_EVENTS } from '../analytics/storeMetricEvents'
 
+const POPULAR_SIZE_EXPERIMENT_FLAG = 'eh-desktop-default-popular-size-desktop'
+const POPULAR_SIZE_PRODUCT_ID = 'state-co'
+const POPULAR_SIZE_LABEL = 'Most popular for homes'
+
 export default function ProductDetail() {
   const { id } = useParams<{ id: string }>()
   const product = products.find(p => p.id === id)
@@ -25,6 +29,10 @@ export default function ProductDetail() {
   const [quantity, setQuantity] = useState(1)
   const [activeTab, setActiveTab] = useState<'description' | 'shipping' | 'reviews'>('description')
 
+  const popularSizeExperimentEnabled =
+    product?.id === POPULAR_SIZE_PRODUCT_ID && flags[POPULAR_SIZE_EXPERIMENT_FLAG]
+  const popularSize = product?.sizes.find(s => s === '3×5 ft') ?? product?.sizes[0]
+
   useEffect(() => {
     if (!product) return
     trackMetric(STORE_METRIC_EVENTS.pdpView, {
@@ -32,6 +40,11 @@ export default function ProductDetail() {
       category: product.category,
     })
   }, [product, trackMetric])
+
+  useEffect(() => {
+    if (!popularSizeExperimentEnabled || !popularSize) return
+    setSelectedSize(current => current || popularSize)
+  }, [popularSizeExperimentEnabled, popularSize])
 
   if (!product) {
     return (
@@ -48,6 +61,19 @@ export default function ProductDetail() {
   const related = products.filter(pr => pr.category === p.category && pr.id !== p.id).slice(0, 4)
   const wishlisted = isWishlisted(p.id)
 
+  function handleSizeSelect(size: string) {
+    setSelectedSize(size)
+    trackMetric(STORE_METRIC_EVENTS.pdpVariantOptionSelected, {
+      productId: p.id,
+      category: p.category,
+      optionName: 'size',
+      optionValue: size,
+      source: 'manual',
+      experimentFlagKey: POPULAR_SIZE_EXPERIMENT_FLAG,
+      experimentVariant: popularSizeExperimentEnabled ? 'eh-arm-1' : 'eh-arm-0',
+    })
+  }
+
   function handleAddToCart() {
     const size = selectedSize || p.sizes[0]
     const material = selectedMaterial || p.material[0]
@@ -58,6 +84,9 @@ export default function ProductDetail() {
       quantity,
       size,
       material,
+      sizeSelectionSource: selectedSize ? 'selected' : 'fallback',
+      experimentFlagKey: POPULAR_SIZE_EXPERIMENT_FLAG,
+      experimentVariant: popularSizeExperimentEnabled ? 'eh-arm-1' : 'eh-arm-0',
     })
     showToast(`${p.name} added to cart`)
   }
@@ -122,15 +151,23 @@ export default function ProductDetail() {
             <div className="mt-5">
               <label className="block text-sm font-medium text-gray-700 mb-2">Size</label>
               <div className="flex flex-wrap gap-2">
-                {p.sizes.map(s => (
-                  <button
-                    key={s}
-                    onClick={() => setSelectedSize(s)}
-                    className={`px-4 py-2 rounded-lg text-sm border ${selectedSize === s ? 'border-[#1B2A4A] bg-[#1B2A4A] text-white' : 'border-gray-200 text-gray-700 hover:border-gray-400'}`}
-                  >
-                    {s}
-                  </button>
-                ))}
+                {p.sizes.map(s => {
+                  const isPopularSize = popularSizeExperimentEnabled && s === popularSize
+                  return (
+                    <button
+                      key={s}
+                      onClick={() => handleSizeSelect(s)}
+                      className={`px-4 py-2 rounded-lg text-sm border ${selectedSize === s ? 'border-[#1B2A4A] bg-[#1B2A4A] text-white' : 'border-gray-200 text-gray-700 hover:border-gray-400'}`}
+                    >
+                      <span>{s}</span>
+                      {isPopularSize && (
+                        <span className={`block text-[11px] leading-tight ${selectedSize === s ? 'text-white/80' : 'text-[#B22234]'}`}>
+                          {POPULAR_SIZE_LABEL}
+                        </span>
+                      )}
+                    </button>
+                  )
+                })}
               </div>
             </div>
           )}
@@ -157,109 +194,73 @@ export default function ProductDetail() {
           <div className="mt-5">
             <label className="block text-sm font-medium text-gray-700 mb-2">Quantity</label>
             <div className="flex items-center border border-gray-200 rounded-lg w-fit">
-              <button onClick={() => setQuantity(q => Math.max(1, q - 1))} className="px-4 py-2 text-gray-700 hover:bg-gray-50 text-lg">−</button>
-              <span className="px-4 py-2 text-sm font-medium w-12 text-center">{quantity}</span>
-              <button onClick={() => setQuantity(q => q + 1)} className="px-4 py-2 text-gray-700 hover:bg-gray-50 text-lg">+</button>
+              <button onClick={() => setQuantity(q => Math.max(1, q - 1))} className="px-3 py-2 text-gray-700 hover:bg-gray-50">−</button>
+              <span className="px-4 py-2 text-sm border-x border-gray-200">{quantity}</span>
+              <button onClick={() => setQuantity(q => q + 1)} className="px-3 py-2 text-gray-700 hover:bg-gray-50">+</button>
             </div>
           </div>
 
-          {/* CTAs */}
-          <div className="mt-6 flex gap-3 flex-wrap">
+          {/* Actions */}
+          <div className="mt-6 flex gap-3">
             <button
               onClick={handleAddToCart}
               disabled={!p.inStock}
-              className="flex-1 bg-[#1B2A4A] text-white font-semibold py-3 px-6 rounded-lg hover:bg-[#B22234] transition-colors disabled:bg-gray-300 disabled:cursor-not-allowed"
+              className="flex-1 bg-[#1B2A4A] text-white font-semibold py-3 rounded-lg hover:bg-[#B22234] transition-colors disabled:bg-gray-300 disabled:cursor-not-allowed"
             >
               {p.inStock ? 'Add to Cart' : 'Out of Stock'}
             </button>
-            {flags['enable-wishlist'] && (
-              <button
-                onClick={handleWishlist}
-                className={`px-4 py-3 rounded-lg border font-medium text-sm transition-colors ${wishlisted ? 'border-red-300 bg-red-50 text-red-600' : 'border-gray-200 text-gray-700 hover:border-gray-400'}`}
-              >
-                {wishlisted ? '♥ Saved' : '♡ Wishlist'}
-              </button>
-            )}
+            <button
+              onClick={handleWishlist}
+              className={`px-5 rounded-lg border transition-colors ${wishlisted ? 'border-[#B22234] bg-red-50 text-[#B22234]' : 'border-gray-200 text-gray-700 hover:bg-gray-50'}`}
+              aria-label={wishlisted ? 'Remove from wishlist' : 'Add to wishlist'}
+            >
+              {wishlisted ? '♥' : '♡'}
+            </button>
           </div>
 
-          {!p.inStock && (
-            <p className="mt-3 text-sm text-red-600">This item is currently out of stock.</p>
-          )}
-
-          {/* Trust signals */}
-          <div className="mt-6 border-t border-gray-100 pt-5 space-y-2">
-            <div className="flex items-center gap-2 text-sm text-gray-500">
-              <span>🚚</span> Free shipping on orders over $75
-            </div>
-            <div className="flex items-center gap-2 text-sm text-gray-500">
-              <span>↩️</span> 30-day hassle-free returns
-            </div>
-            <div className="flex items-center gap-2 text-sm text-gray-500">
-              <span>✅</span> Satisfaction guaranteed
-            </div>
+          <div className="mt-5 text-sm text-gray-500 space-y-1">
+            <p>✓ Ships within 1–2 business days</p>
+            <p>✓ 30-day returns</p>
+            <p>✓ Secure checkout</p>
           </div>
         </div>
       </div>
 
       {/* Tabs */}
-      <div className="border-b border-gray-200 mb-8">
-        <div className="flex gap-0">
-          {tabs.map(tab => (
+      <div className="border-b border-gray-200 mb-6">
+        <div className="flex gap-6">
+          {tabs.map(t => (
             <button
-              key={tab}
-              onClick={() => setActiveTab(tab as 'description' | 'shipping' | 'reviews')}
-              className={`px-6 py-3 text-sm font-medium border-b-2 capitalize transition-colors ${
-                activeTab === tab
-                  ? 'border-[#B22234] text-[#B22234]'
-                  : 'border-transparent text-gray-500 hover:text-gray-700'
-              }`}
+              key={t}
+              onClick={() => setActiveTab(t as 'description' | 'shipping' | 'reviews')}
+              className={`py-3 text-sm font-medium capitalize border-b-2 ${activeTab === t ? 'border-[#B22234] text-[#B22234]' : 'border-transparent text-gray-500 hover:text-gray-900'}`}
             >
-              {tab}
+              {t}
             </button>
           ))}
         </div>
       </div>
 
-      <div className="mb-12">
-        {activeTab === 'description' && (
-          <div className="prose max-w-none text-gray-600">
-            <p className="text-base leading-relaxed">{p.description}</p>
-            <div className="mt-4 grid grid-cols-2 gap-4 text-sm">
-              <div>
-                <span className="font-medium text-gray-900">Available Sizes:</span>
-                <ul className="mt-1 space-y-1">
-                  {p.sizes.map(s => <li key={s} className="text-gray-600">• {s}</li>)}
-                </ul>
-              </div>
-              <div>
-                <span className="font-medium text-gray-900">Materials:</span>
-                <ul className="mt-1 space-y-1">
-                  {p.material.map(m => <li key={m} className="text-gray-600">• {m}</li>)}
-                </ul>
-              </div>
-            </div>
-          </div>
-        )}
+      <div className="mb-12 text-gray-700 leading-relaxed">
+        {activeTab === 'description' && <p>{p.description}</p>}
         {activeTab === 'shipping' && (
-          <div className="text-sm text-gray-600 space-y-3">
-            <p><strong className="text-gray-900">Standard Shipping (5–7 business days):</strong> Free on orders over $75, otherwise $8.99.</p>
-            <p><strong className="text-gray-900">Express Shipping (2–3 business days):</strong> $14.99</p>
-            <p><strong className="text-gray-900">Overnight Shipping:</strong> $29.99</p>
-            <p><strong className="text-gray-900">Returns:</strong> We accept returns within 30 days of delivery. Items must be unused and in original packaging.</p>
+          <div className="space-y-2">
+            <p>Standard shipping typically arrives in 5–7 business days.</p>
+            <p>Express and overnight options may be available at checkout.</p>
+            <p>All flags are carefully packed to protect stitching, grommets, and finish.</p>
           </div>
         )}
-        {activeTab === 'reviews' && flags['show-reviews-tab'] && (
-          <div className="space-y-5">
+        {activeTab === 'reviews' && (
+          <div className="space-y-4">
             {reviews.map(r => (
-              <div key={r.id} className="border border-gray-100 rounded-xl p-5">
-                <div className="flex items-start justify-between mb-2">
+              <div key={r.id} className="border border-gray-100 rounded-xl p-4">
+                <div className="flex items-center justify-between mb-2">
                   <div>
-                    <span className="font-semibold text-gray-900 text-sm">{r.author}</span>
-                    <div className="mt-0.5"><StarRating rating={r.rating} /></div>
+                    <p className="font-semibold text-gray-900">{r.title}</p>
+                    <p className="text-xs text-gray-500">By {r.author} · {new Date(r.date).toLocaleDateString()}</p>
                   </div>
-                  <span className="text-xs text-gray-400">{r.date}</span>
+                  <StarRating rating={r.rating} />
                 </div>
-                <p className="font-medium text-sm text-gray-900 mb-1">{r.title}</p>
                 <p className="text-sm text-gray-600">{r.body}</p>
               </div>
             ))}
@@ -267,12 +268,11 @@ export default function ProductDetail() {
         )}
       </div>
 
-      {/* Related products */}
       {flags['show-product-recommendations'] && related.length > 0 && (
         <section>
-          <h2 className="text-xl font-bold text-gray-900 mb-5">You May Also Like</h2>
+          <h2 className="text-xl font-bold text-gray-900 mb-5">You may also like</h2>
           <div className="grid grid-cols-2 md:grid-cols-4 gap-5">
-            {related.map(p => <ProductCard key={p.id} product={p} />)}
+            {related.map(pr => <ProductCard key={pr.id} product={pr} />)}
           </div>
         </section>
       )}
