@@ -1,0 +1,48 @@
+# Experiment Hunter — developer handoff
+
+This file was generated automatically when **Test Idea** opened this pull request. If GitHub Actions or Playwright fails, share the sections below with your team or paste the prompt into your coding agent.
+
+## Links
+
+- **Flag (LaunchDarkly):** `eh-best-sellers-inline-trust-desktop`
+- **Experiment (LaunchDarkly):** `eh-best-sellers-inline-trust-desktop-exp`
+
+## Summary
+
+### Title
+Embed Trust Signals Inside Best Sellers Section
+
+### Hypothesis
+If the trust promise strip (Made in USA, Fast Shipping, Satisfaction Guaranteed, Bulk Discounts) is repositioned to appear immediately below the 'Best Sellers' section heading and above the product cards, then the add-to-cart rate from the Best Sellers section will increase, because presenting trust signals at the point of product evaluation reduces purchase anxiety before the shopper must decide to click through to a PDP.
+
+### Arms
+- **Control:** The trust icon strip (Made in USA, Fast Shipping, Satisfaction Guaranteed, Bulk Discounts) appears in its own full-width band below the Best Sellers product grid, separated by whitespace.
+- **Treatment:** A compact version of the trust strip is inserted directly beneath the 'Best Sellers' heading, above the product cards, so shoppers see the guarantees while scanning products rather than after scrolling past them.
+
+### Metrics
+FlagShip — Add to cart (flagship-store-add-to-cart) — FlagShip — Add to cart; Homepage Best Seller Product Click: Measures click engagement on Best Sellers product cards to understand if trust signal proximity increases product exploration. LaunchDarkly metric: eh-suggested-homepage_best_seller_product_click; Consider running a session-replay or heatmap tool (e.g.; Hotjar; FullStory) on both variants to observe qualitative differences in how users interact with the Best Sellers section and whether the inline trust strip draws visual attention.; Measures the rate at which homepage desktop visitors add any product to cart. Primary focus is on add-to-cart actions originating from the Best Sellers section product cards (hover-state 'Add to Cart' button).; FlagShip — PDP view; FlagShip — Checkout start
+
+## Copy-paste prompt (for your dev / AI assistant)
+
+```text
+You are helping fix or finish a code change for a storefront repo opened by Experiment Hunter (A/B test wiring).
+
+**LaunchDarkly flag key:** `eh-best-sellers-inline-trust-desktop`
+**LaunchDarkly experiment key:** `eh-best-sellers-inline-trust-desktop-exp`
+
+**Experiment title:** Embed Trust Signals Inside Best Sellers Section
+**Hypothesis:** If the trust promise strip (Made in USA, Fast Shipping, Satisfaction Guaranteed, Bulk Discounts) is repositioned to appear immediately below the 'Best Sellers' section heading and above the product cards, then the add-to-cart rate from the Best Sellers section will increase, because presenting trust signals at the point of product evaluation reduces purchase anxiety before the shopper must decide to click through to a PDP.
+
+**Control (current):** The trust icon strip (Made in USA, Fast Shipping, Satisfaction Guaranteed, Bulk Discounts) appears in its own full-width band below the Best Sellers product grid, separated by whitespace.
+**Treatment (variant):** A compact version of the trust strip is inserted directly beneath the 'Best Sellers' heading, above the product cards, so shoppers see the guarantees while scanning products rather than after scrolling past them.
+
+**Metrics to preserve or instrument:** FlagShip — Add to cart (flagship-store-add-to-cart) — FlagShip — Add to cart; Homepage Best Seller Product Click: Measures click engagement on Best Sellers product cards to understand if trust signal proximity increases product exploration. LaunchDarkly metric: eh-suggested-homepage_best_seller_product_click; Consider running a session-replay or heatmap tool (e.g.; Hotjar; FullStory) on both variants to observe qualitative differences in how users interact with the Best Sellers section and whether the inline trust strip draws visual attention.; Measures the rate at which homepage desktop visitors add any product to cart. Primary focus is on add-to-cart actions originating from the Best Sellers section product cards (hover-state 'Add to Cart' button).; FlagShip — PDP view; FlagShip — Checkout start
+
+**Requirements:**
+- Implement the treatment so it is correctly gated by LaunchDarkly flag `eh-best-sellers-inline-trust-desktop` (read via the project’s existing LaunchDarkly client / hook pattern).
+- Keep TypeScript and ESLint clean; match existing file structure and naming.
+- If the repo uses Playwright (or another E2E runner), add or update tests so CI can prove the treatment behavior when the LaunchDarkly flag is **on** in the test environment (or document a test-only flag override if the team uses that pattern).
+- If CI failed, read the GitHub Actions logs for this PR, fix the root cause, and push commits to the same branch.
+```
+
+_Generated by Experiment Hunter. Safe to delete after merge if you prefer not to keep it in the repo._
