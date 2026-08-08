@@ -9,4 +9,5 @@ export const STORE_METRIC_EVENTS = {
   cartView: 'flagship-store-cart-view',
   checkoutStart: 'flagship-store-checkout-start',
   orderConfirmation: 'flagship-store-order-confirmation',
+  pdpVariantOptionSelected: 'pdp_variant_option_selected',
 } as const

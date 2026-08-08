@@ -11,6 +11,8 @@ const stateShowDefaults: StateShowFlags = Object.fromEntries(
   STATE_CATALOG_PRODUCT_IDS.map((id) => [`show-${id}`, true]),
 ) as StateShowFlags
 
+export const DESKTOP_DEFAULT_POPULAR_SIZE_FLAG_KEY = 'eh-desktop-default-popular-size-desktop'
+
 export interface FlagSet extends StateShowFlags {
   'show-promo-banner': boolean
   'enable-express-checkout': boolean
@@ -22,6 +24,7 @@ export interface FlagSet extends StateShowFlags {
   'checkout-progress-indicator': boolean
   'free-shipping-threshold': number
   'homepage-hero-variant': string
+  [DESKTOP_DEFAULT_POPULAR_SIZE_FLAG_KEY]: boolean
 }
 
 const defaults: Omit<FlagSet, keyof StateShowFlags> & StateShowFlags = {
@@ -36,6 +39,7 @@ const defaults: Omit<FlagSet, keyof StateShowFlags> & StateShowFlags = {
   'checkout-progress-indicator': true,
   'free-shipping-threshold': 75,
   'homepage-hero-variant': 'control',
+  [DESKTOP_DEFAULT_POPULAR_SIZE_FLAG_KEY]: false,
 }
 
 function stateShowFromFlags(flags: ReturnType<typeof useFlags>): StateShowFlags {
@@ -62,5 +66,6 @@ export function useLDFlags(): FlagSet {
     'checkout-progress-indicator': flags['checkout-progress-indicator'] ?? defaults['checkout-progress-indicator'],
     'free-shipping-threshold': flags['free-shipping-threshold'] ?? defaults['free-shipping-threshold'],
     'homepage-hero-variant': flags['homepage-hero-variant'] ?? defaults['homepage-hero-variant'],
+    [DESKTOP_DEFAULT_POPULAR_SIZE_FLAG_KEY]: flags[DESKTOP_DEFAULT_POPULAR_SIZE_FLAG_KEY] ?? defaults[DESKTOP_DEFAULT_POPULAR_SIZE_FLAG_KEY],
   }
 }
