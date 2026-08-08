@@ -1,25 +1,29 @@
-# Best Sellers ATC Experiment
+# Best Sellers ATC Visibility Experiment
 
-This module implements the A/B test for the Best Sellers 'Add to Cart' button visibility on the flagship-store homepage for desktop users.
+This module implements an A/B test for the flagship-store homepage to evaluate the impact of making 'Add to Cart' buttons always visible on Best Seller cards for desktop users.
 
-## Experiment Details
+## Implementation Details
+
 - **Flag Key**: `eh-d-best-sellers-atc-visible-desktop`
-- **Control**: 'Add to Cart' button is hidden until hover.
-- **Variant**: 'Add to Cart' button is always visible.
+- **Control (A)**: 'Add to Cart' button is hidden until hover (opacity 0).
+- **Variant (B)**: 'Add to Cart' button is visible by default with clear hierarchy.
 
 ## Usage
-Wrap the Best Sellers component with `BestSellersATCExperiment` to apply the experiment logic based on the LaunchDarkly flag.
+
+Import `BestSellersATCTest` into your homepage component and ensure LaunchDarkly is properly configured in your application.
 
 ```jsx
-import BestSellersATCExperiment from './BestSellersATCExperiment';
+import BestSellersATCTest from './experiment-hunter/BestSellersATCTest';
 
-const BestSellersSection = () => (
-  <BestSellersATCExperiment>
-    {/* Best Sellers cards here */}
-  </BestSellersATCExperiment>
+const HomePage = () => (
+  <div>
+    <BestSellersATCTest />
+    {/* Other homepage components */}
+  </div>
 );
 ```
 
 ## Notes
-- Ensure the experiment is only applied to desktop viewports.
-- Maintain existing hover styles for the 'Add to Cart' button.
+
+- Ensure this test runs only on desktop viewports.
+- The primary metric is `best_seller_add_to_cart_click` to track engagement.
