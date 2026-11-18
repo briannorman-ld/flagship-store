@@ -22,6 +22,8 @@ export interface FlagSet extends StateShowFlags {
   'checkout-progress-indicator': boolean
   'free-shipping-threshold': number
   'homepage-hero-variant': string
+  /** Experiment Hunter: homepage product-card "Add to Cart" visible without hovering (desktop). */
+  'eh-desktop-visible-card-atc-desktop': boolean
 }
 
 const defaults: Omit<FlagSet, keyof StateShowFlags> & StateShowFlags = {
@@ -36,6 +38,7 @@ const defaults: Omit<FlagSet, keyof StateShowFlags> & StateShowFlags = {
   'checkout-progress-indicator': true,
   'free-shipping-threshold': 75,
   'homepage-hero-variant': 'control',
+  'eh-desktop-visible-card-atc-desktop': false,
 }
 
 function stateShowFromFlags(flags: ReturnType<typeof useFlags>): StateShowFlags {
@@ -62,5 +65,7 @@ export function useLDFlags(): FlagSet {
     'checkout-progress-indicator': flags['checkout-progress-indicator'] ?? defaults['checkout-progress-indicator'],
     'free-shipping-threshold': flags['free-shipping-threshold'] ?? defaults['free-shipping-threshold'],
     'homepage-hero-variant': flags['homepage-hero-variant'] ?? defaults['homepage-hero-variant'],
+    'eh-desktop-visible-card-atc-desktop':
+      flags['eh-desktop-visible-card-atc-desktop'] ?? defaults['eh-desktop-visible-card-atc-desktop'],
   }
 }

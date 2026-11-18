@@ -4,20 +4,40 @@ import FlagImage from './FlagImage'
 import StarRating from './StarRating'
 import { useCart } from '../context/CartContext'
 import { useLDFlags } from '../hooks/useLDFlags'
+import { useStoreMetricTrack } from '../hooks/useStoreMetricTrack'
+import { STORE_METRIC_EVENTS } from '../analytics/storeMetricEvents'
 import { showToast } from '../lib/toast-bus'
+
+/** Where the card is rendered; scopes homepage-only experiments and metric attribution. */
+export type ProductCardPlacement = 'homepage' | 'listing'
 
 interface ProductCardProps {
   product: Product
+  placement?: ProductCardPlacement
 }
 
-export default function ProductCard({ product }: ProductCardProps) {
+export default function ProductCard({ product, placement = 'listing' }: ProductCardProps) {
   const { addToCart } = useCart()
   const flags = useLDFlags()
+  const trackMetric = useStoreMetricTrack()
   const isOnSale = !!product.originalPrice
+  const onHomepage = placement === 'homepage'
+  /** Experiment: show "Add to Cart" without hovering. Default (flags off) keeps the hover-only button. */
+  const addToCartVisible = onHomepage && flags['eh-desktop-visible-card-atc-desktop']
 
   function handleAddToCart(e: React.MouseEvent) {
     e.preventDefault()
     addToCart(product, 1, product.sizes[0], product.material[0])
+    trackMetric(STORE_METRIC_EVENTS.addToCart, {
+      productId: product.id,
+      category: product.category,
+      quantity: 1,
+      size: product.sizes[0],
+      material: product.material[0],
+      placement,
+      source: 'product-card',
+      experimentKey: onHomepage ? 'eh-desktop-visible-card-atc-desktop' : undefined,
+    })
     showToast(`${product.name} added to cart`)
   }
 
@@ -55,7 +75,9 @@ export default function ProductCard({ product }: ProductCardProps) {
           <button
             onClick={handleAddToCart}
             disabled={!product.inStock}
-            className="w-full rounded-lg bg-[#1B2A4A] py-2 text-sm font-medium text-white opacity-0 transition-opacity duration-150 group-hover:opacity-100 hover:bg-[#B22234] disabled:cursor-not-allowed disabled:bg-gray-300"
+            className={`w-full rounded-lg bg-[#1B2A4A] py-2 text-sm font-medium text-white transition-opacity duration-150 hover:bg-[#B22234] disabled:cursor-not-allowed disabled:bg-gray-300 ${
+              addToCartVisible ? 'opacity-100' : 'opacity-0 group-hover:opacity-100'
+            }`}
           >
             Add to Cart
           </button>

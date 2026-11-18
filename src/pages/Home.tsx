@@ -154,7 +154,7 @@ export default function Home() {
             <Link to="/" className="text-sm text-[#B22234] font-medium hover:underline">Shop all →</Link>
           </div>
           <div className="grid grid-cols-2 md:grid-cols-4 gap-5">
-            {bestSellerProducts.map(p => <ProductCard key={p.id} product={p} />)}
+            {bestSellerProducts.map(p => <ProductCard key={p.id} product={p} placement="homepage" />)}
           </div>
         </div>
       </section>
@@ -185,7 +185,7 @@ export default function Home() {
             <Link to="/flags/garden" className="text-sm text-[#B22234] font-medium hover:underline">View all →</Link>
           </div>
           <div className="grid grid-cols-2 md:grid-cols-4 gap-5">
-            {newArrivals.map(p => <ProductCard key={p.id} product={p} />)}
+            {newArrivals.map(p => <ProductCard key={p.id} product={p} placement="homepage" />)}
           </div>
         </div>
       </section>
