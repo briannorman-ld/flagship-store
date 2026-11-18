@@ -15,6 +15,11 @@ const categoryCards = [
   { slug: 'golf', emoji: '⛳', bg: 'from-green-600 to-lime-400' },
 ]
 
+/** Remaining categories as text links — excludes the ones already shown as gradient cards (fixes the duplicate Golf tile). */
+const secondaryCategorySlugs = Object.keys(categoryMeta).filter(
+  slug => !categoryCards.some(card => card.slug === slug),
+)
+
 const trustBadges = [
   { icon: '🇺🇸', title: 'Made in USA Options', desc: 'Proudly American-made flags available', short: 'Quality craftsmanship' },
   { icon: '🚚', title: 'Fast Shipping', desc: 'Most orders ship within 1 business day', short: 'Ships in 1–2 business days' },
@@ -103,6 +108,15 @@ export default function Home() {
     trackMetric(STORE_METRIC_EVENTS.addToCartHomepage, bestSellerEventData(product))
   }
 
+  function trackCategoryTileClick(slug: string, tileType: 'gradient' | 'text') {
+    trackMetric(STORE_METRIC_EVENTS.categoryTileClick, {
+      category: slug,
+      categoryLabel: categoryMeta[slug]?.label ?? slug,
+      tileType,
+      destinationUrl: `/flags/${slug}`,
+    })
+  }
+
   function trackBrowseAllClick() {
     trackMetric(STORE_METRIC_EVENTS.heroSecondaryCtaClick, {
       cta: 'Browse All Categories',
@@ -189,6 +203,7 @@ export default function Home() {
             <Link
               key={slug}
               to={`/flags/${slug}`}
+              onClick={() => trackCategoryTileClick(slug, 'gradient')}
               className={`bg-gradient-to-br ${bg} text-white rounded-xl py-2.5 px-3 flex flex-row items-center justify-center gap-2.5 hover:scale-[1.02] transition-transform shadow-md aspect-[3/1]`}
             >
               <span className="text-2xl shrink-0">{emoji}</span>
@@ -197,13 +212,14 @@ export default function Home() {
           ))}
         </div>
         <div className="mt-4 grid grid-cols-2 md:grid-cols-4 gap-4">
-          {Object.entries(categoryMeta).slice(4).map(([slug, meta]) => (
+          {secondaryCategorySlugs.map(slug => (
             <Link
               key={slug}
               to={`/flags/${slug}`}
+              onClick={() => trackCategoryTileClick(slug, 'text')}
               className="border border-gray-200 text-gray-700 rounded-xl p-4 flex items-center gap-3 hover:border-[#1B2A4A] hover:bg-gray-50 transition-colors"
             >
-              <span className="font-medium text-sm">{meta.label} →</span>
+              <span className="font-medium text-sm">{categoryMeta[slug].label} →</span>
             </Link>
           ))}
         </div>
