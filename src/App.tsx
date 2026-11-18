@@ -1,6 +1,7 @@
 import { Routes, Route } from 'react-router-dom'
 import Layout from './components/Layout'
 import Home from './pages/Home'
+import AllFlags from './pages/AllFlags'
 import CategoryPLP from './pages/CategoryPLP'
 import Search from './pages/Search'
 import ProductDetail from './pages/ProductDetail'
@@ -18,6 +19,7 @@ export default function App() {
     <Layout>
       <Routes>
         <Route path="/" element={<Home />} />
+        <Route path="/flags" element={<AllFlags />} />
         <Route path="/flags/:slug" element={<CategoryPLP />} />
         <Route path="/search" element={<Search />} />
         <Route path="/product/:id" element={<ProductDetail />} />

@@ -103,6 +103,13 @@ export default function Home() {
     trackMetric(STORE_METRIC_EVENTS.addToCartHomepage, bestSellerEventData(product))
   }
 
+  function trackBrowseAllClick() {
+    trackMetric(STORE_METRIC_EVENTS.heroSecondaryCtaClick, {
+      cta: 'Browse All Categories',
+      destinationUrl: '/flags',
+    })
+  }
+
   return (
     <div>
       {/* Hero */}
@@ -150,7 +157,11 @@ export default function Home() {
               <Link to="/flags/american" className="bg-[#B22234] text-white font-semibold px-8 py-3 rounded-lg hover:bg-red-700 transition-colors shadow-lg">
                 Shop American Flags
               </Link>
-              <Link to="/flags/nautical" className="bg-white/15 backdrop-blur-sm text-white font-semibold px-8 py-3 rounded-lg hover:bg-white/25 transition-colors border border-white/20">
+              <Link
+                to="/flags"
+                onClick={trackBrowseAllClick}
+                className="bg-white/15 backdrop-blur-sm text-white font-semibold px-8 py-3 rounded-lg hover:bg-white/25 transition-colors border border-white/20"
+              >
                 Browse All Categories
               </Link>
             </div>

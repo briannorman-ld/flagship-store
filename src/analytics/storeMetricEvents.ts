@@ -12,4 +12,7 @@ export const STORE_METRIC_EVENTS = {
   homepageBestSellerProductClick: 'eh-suggested-homepage_best_seller_product_click',
   addToCartHomepage: 'add_to_cart_homepage',
   productCardClick: 'product_card_click',
+  heroSecondaryCtaClick: 'eh-suggested-hero_secondary_cta_click',
+  categoryTileClick: 'eh-suggested-category_tile_click',
+  scrollDepthReached: 'scroll_depth_reached',
 } as const
