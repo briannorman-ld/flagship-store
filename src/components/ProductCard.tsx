@@ -14,9 +14,13 @@ export type ProductCardPlacement = 'homepage' | 'homepage-best-sellers' | 'listi
 interface ProductCardProps {
   product: Product
   placement?: ProductCardPlacement
+  /** Called when the card itself (link to the PDP) is clicked. */
+  onProductClick?: (product: Product) => void
+  /** Called after the card's "Add to Cart" button adds the item. */
+  onAddToCart?: (product: Product) => void
 }
 
-export default function ProductCard({ product, placement = 'listing' }: ProductCardProps) {
+export default function ProductCard({ product, placement = 'listing', onProductClick, onAddToCart }: ProductCardProps) {
   const { addToCart } = useCart()
   const flags = useLDFlags()
   const trackMetric = useStoreMetricTrack()
@@ -49,11 +53,12 @@ export default function ProductCard({ product, placement = 'listing' }: ProductC
           ? 'eh-desktop-visible-card-atc-desktop'
           : undefined,
     })
+    onAddToCart?.(product)
     showToast(`${product.name} added to cart`)
   }
 
   return (
-    <Link to={`/product/${product.id}`} className="group flex h-full min-h-0 flex-col">
+    <Link to={`/product/${product.id}`} onClick={() => onProductClick?.(product)} className="group flex h-full min-h-0 flex-col">
       <div className="relative flex h-full min-h-0 flex-col overflow-hidden rounded-xl border border-gray-100 bg-white shadow-sm transition-shadow duration-200 hover:shadow-md">
         {isOnSale && flags['show-sale-badge'] && (
           <div className="absolute top-3 left-3 z-10 bg-red-600 text-white text-xs font-semibold px-2 py-0.5 rounded-full">

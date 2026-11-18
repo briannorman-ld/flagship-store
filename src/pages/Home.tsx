@@ -3,12 +3,23 @@ import { products, categoryMeta } from '../data/products'
 import type { Product } from '../types'
 import ProductCard from '../components/ProductCard'
 import { useLDFlags } from '../hooks/useLDFlags'
+import { useStoreMetricTrack } from '../hooks/useStoreMetricTrack'
+import { STORE_METRIC_EVENTS } from '../analytics/storeMetricEvents'
+
+const BEST_SELLERS_INLINE_TRUST_FLAG = 'eh-best-sellers-inline-trust-desktop'
 
 const categoryCards = [
   { slug: 'american', emoji: '🇺🇸', bg: 'from-blue-900 to-red-700' },
   { slug: 'nautical', emoji: '⚓', bg: 'from-blue-700 to-cyan-500' },
   { slug: 'state', emoji: '🗺️', bg: 'from-green-700 to-emerald-500' },
   { slug: 'golf', emoji: '⛳', bg: 'from-green-600 to-lime-400' },
+]
+
+const trustBadges = [
+  { icon: '🇺🇸', title: 'Made in USA Options', desc: 'Proudly American-made flags available', short: 'Quality craftsmanship' },
+  { icon: '🚚', title: 'Fast Shipping', desc: 'Most orders ship within 1 business day', short: 'Ships in 1–2 business days' },
+  { icon: '✅', title: 'Satisfaction Guaranteed', desc: '30-day returns on all items', short: '30-day returns' },
+  { icon: '📦', title: 'Bulk Discounts', desc: 'Save more when you order in quantity', short: 'Save on large orders' },
 ]
 
 /** Same four categories as the hero category cards — one standout per category. */
@@ -47,9 +58,50 @@ const newArrivals = products.slice(-4)
 /** Self-hosted in /public; works with Vite `base` on GitHub Pages */
 const heroImageSrc = `${import.meta.env.BASE_URL}hero-american-flag-mountains.jpg`
 
+/** Experiment treatment: compact trust strip shown directly under the Best Sellers heading (desktop). */
+function InlineTrustStrip() {
+  return (
+    <div className="hidden lg:flex items-center justify-center gap-4 rounded-xl border border-gray-100 bg-white px-5 py-3 shadow-sm">
+      {trustBadges.map(badge => (
+        <div key={badge.title} className="flex items-center gap-2 whitespace-nowrap">
+          <span className="text-2xl" aria-hidden>{badge.icon}</span>
+          <div>
+            <div className="text-xs font-semibold text-gray-900 leading-tight">{badge.title}</div>
+            <div className="text-[11px] text-gray-500 leading-tight">{badge.short}</div>
+          </div>
+        </div>
+      ))}
+    </div>
+  )
+}
+
 export default function Home() {
   const flags = useLDFlags()
+  const trackMetric = useStoreMetricTrack()
   const heroVariant = flags['homepage-hero-variant']
+  const showInlineTrust = flags[BEST_SELLERS_INLINE_TRUST_FLAG]
+
+  function bestSellerEventData(product: Product) {
+    return {
+      productId: product.id,
+      productName: product.name,
+      category: product.category,
+      section: 'best_sellers',
+      flagKey: BEST_SELLERS_INLINE_TRUST_FLAG,
+      variation: showInlineTrust ? 'inline-trust' : 'control',
+    }
+  }
+
+  function handleBestSellerClick(product: Product) {
+    const data = bestSellerEventData(product)
+    trackMetric(STORE_METRIC_EVENTS.homepageBestSellerProductClick, data)
+    trackMetric(STORE_METRIC_EVENTS.productCardClick, data)
+  }
+
+  /** ProductCard already sends the base add-to-cart event; this adds the homepage-scoped one. */
+  function handleBestSellerAddToCart(product: Product) {
+    trackMetric(STORE_METRIC_EVENTS.addToCartHomepage, bestSellerEventData(product))
+  }
 
   return (
     <div>
@@ -153,29 +205,39 @@ export default function Home() {
             <h2 className="text-2xl font-bold text-gray-900">Best Sellers</h2>
             <Link to="/" className="text-sm text-[#B22234] font-medium hover:underline">Shop all →</Link>
           </div>
+          {showInlineTrust && (
+            <div className="mb-5">
+              <InlineTrustStrip />
+            </div>
+          )}
           <div className="grid grid-cols-2 md:grid-cols-4 gap-5">
-            {bestSellerProducts.map(p => <ProductCard key={p.id} product={p} placement="homepage-best-sellers" />)}
+            {bestSellerProducts.map(p => (
+              <ProductCard
+                key={p.id}
+                product={p}
+                placement="homepage-best-sellers"
+                onProductClick={handleBestSellerClick}
+                onAddToCart={handleBestSellerAddToCart}
+              />
+            ))}
           </div>
         </div>
       </section>
 
-      {/* Trust bar */}
-      <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-14">
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-6 text-center">
-          {[
-            { icon: '🇺🇸', title: 'Made in USA Options', desc: 'Proudly American-made flags available' },
-            { icon: '🚚', title: 'Fast Shipping', desc: 'Most orders ship within 1 business day' },
-            { icon: '✅', title: 'Satisfaction Guaranteed', desc: '30-day returns on all items' },
-            { icon: '📦', title: 'Bulk Discounts', desc: 'Save more when you order in quantity' },
-          ].map(item => (
-            <div key={item.title} className="flex flex-col items-center gap-2 p-4">
-              <span className="text-3xl">{item.icon}</span>
-              <h3 className="font-semibold text-gray-900 text-sm">{item.title}</h3>
-              <p className="text-xs text-gray-500">{item.desc}</p>
-            </div>
-          ))}
-        </div>
-      </section>
+      {/* Trust bar (default layout; replaced by the inline strip when the experiment is on) */}
+      {!showInlineTrust && (
+        <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-14">
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-6 text-center">
+            {trustBadges.map(item => (
+              <div key={item.title} className="flex flex-col items-center gap-2 p-4">
+                <span className="text-3xl">{item.icon}</span>
+                <h3 className="font-semibold text-gray-900 text-sm">{item.title}</h3>
+                <p className="text-xs text-gray-500">{item.desc}</p>
+              </div>
+            ))}
+          </div>
+        </section>
+      )}
 
       {/* New Arrivals */}
       <section className="bg-gray-50 py-14">

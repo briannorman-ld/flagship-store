@@ -26,6 +26,8 @@ export interface FlagSet extends StateShowFlags {
   'eh-desktop-visible-card-atc-desktop': boolean
   /** Experiment Hunter: Best Sellers cards show "Add to Cart" without hovering (desktop). */
   'eh-d-best-sellers-atc-visible-desktop': boolean
+  /** Experiment Hunter: compact trust strip directly under the Best Sellers heading (desktop). */
+  'eh-best-sellers-inline-trust-desktop': boolean
 }
 
 const defaults: Omit<FlagSet, keyof StateShowFlags> & StateShowFlags = {
@@ -42,6 +44,7 @@ const defaults: Omit<FlagSet, keyof StateShowFlags> & StateShowFlags = {
   'homepage-hero-variant': 'control',
   'eh-desktop-visible-card-atc-desktop': false,
   'eh-d-best-sellers-atc-visible-desktop': false,
+  'eh-best-sellers-inline-trust-desktop': false,
 }
 
 function stateShowFromFlags(flags: ReturnType<typeof useFlags>): StateShowFlags {
@@ -72,5 +75,7 @@ export function useLDFlags(): FlagSet {
       flags['eh-desktop-visible-card-atc-desktop'] ?? defaults['eh-desktop-visible-card-atc-desktop'],
     'eh-d-best-sellers-atc-visible-desktop':
       flags['eh-d-best-sellers-atc-visible-desktop'] ?? defaults['eh-d-best-sellers-atc-visible-desktop'],
+    'eh-best-sellers-inline-trust-desktop':
+      flags['eh-best-sellers-inline-trust-desktop'] ?? defaults['eh-best-sellers-inline-trust-desktop'],
   }
 }
