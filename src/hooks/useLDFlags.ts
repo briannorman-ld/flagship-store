@@ -24,6 +24,8 @@ export interface FlagSet extends StateShowFlags {
   'homepage-hero-variant': string
   /** Experiment Hunter: homepage product-card "Add to Cart" visible without hovering (desktop). */
   'eh-desktop-visible-card-atc-desktop': boolean
+  /** Experiment Hunter: Best Sellers cards show "Add to Cart" without hovering (desktop). */
+  'eh-d-best-sellers-atc-visible-desktop': boolean
 }
 
 const defaults: Omit<FlagSet, keyof StateShowFlags> & StateShowFlags = {
@@ -39,6 +41,7 @@ const defaults: Omit<FlagSet, keyof StateShowFlags> & StateShowFlags = {
   'free-shipping-threshold': 75,
   'homepage-hero-variant': 'control',
   'eh-desktop-visible-card-atc-desktop': false,
+  'eh-d-best-sellers-atc-visible-desktop': false,
 }
 
 function stateShowFromFlags(flags: ReturnType<typeof useFlags>): StateShowFlags {
@@ -67,5 +70,7 @@ export function useLDFlags(): FlagSet {
     'homepage-hero-variant': flags['homepage-hero-variant'] ?? defaults['homepage-hero-variant'],
     'eh-desktop-visible-card-atc-desktop':
       flags['eh-desktop-visible-card-atc-desktop'] ?? defaults['eh-desktop-visible-card-atc-desktop'],
+    'eh-d-best-sellers-atc-visible-desktop':
+      flags['eh-d-best-sellers-atc-visible-desktop'] ?? defaults['eh-d-best-sellers-atc-visible-desktop'],
   }
 }

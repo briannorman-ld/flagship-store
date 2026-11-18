@@ -9,7 +9,7 @@ import { STORE_METRIC_EVENTS } from '../analytics/storeMetricEvents'
 import { showToast } from '../lib/toast-bus'
 
 /** Where the card is rendered; scopes homepage-only experiments and metric attribution. */
-export type ProductCardPlacement = 'homepage' | 'listing'
+export type ProductCardPlacement = 'homepage' | 'homepage-best-sellers' | 'listing'
 
 interface ProductCardProps {
   product: Product
@@ -21,9 +21,16 @@ export default function ProductCard({ product, placement = 'listing' }: ProductC
   const flags = useLDFlags()
   const trackMetric = useStoreMetricTrack()
   const isOnSale = !!product.originalPrice
-  const onHomepage = placement === 'homepage'
-  /** Experiment: show "Add to Cart" without hovering. Default (flags off) keeps the hover-only button. */
-  const addToCartVisible = onHomepage && flags['eh-desktop-visible-card-atc-desktop']
+  const onHomepage = placement === 'homepage' || placement === 'homepage-best-sellers'
+  const inBestSellers = placement === 'homepage-best-sellers'
+  /**
+   * Experiments: show "Add to Cart" without hovering. Homepage cards follow
+   * `eh-desktop-visible-card-atc-desktop`; Best Sellers cards also follow
+   * `eh-d-best-sellers-atc-visible-desktop`. Default (flags off) keeps the hover-only button.
+   */
+  const addToCartVisible =
+    (onHomepage && flags['eh-desktop-visible-card-atc-desktop']) ||
+    (inBestSellers && flags['eh-d-best-sellers-atc-visible-desktop'])
 
   function handleAddToCart(e: React.MouseEvent) {
     e.preventDefault()
@@ -36,7 +43,11 @@ export default function ProductCard({ product, placement = 'listing' }: ProductC
       material: product.material[0],
       placement,
       source: 'product-card',
-      experimentKey: onHomepage ? 'eh-desktop-visible-card-atc-desktop' : undefined,
+      experimentKey: inBestSellers
+        ? 'eh-d-best-sellers-atc-visible-desktop'
+        : onHomepage
+          ? 'eh-desktop-visible-card-atc-desktop'
+          : undefined,
     })
     showToast(`${product.name} added to cart`)
   }
