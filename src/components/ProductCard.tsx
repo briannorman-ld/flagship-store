@@ -38,6 +38,7 @@ export default function ProductCard({ product, placement = 'listing', onProductC
 
   function handleAddToCart(e: React.MouseEvent) {
     e.preventDefault()
+    e.stopPropagation() // keep the card's onProductClick from also firing
     addToCart(product, 1, product.sizes[0], product.material[0])
     trackMetric(STORE_METRIC_EVENTS.addToCart, {
       productId: product.id,
